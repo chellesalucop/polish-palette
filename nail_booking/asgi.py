@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 
 import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nail_booking.nail_booking.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nail_booking.settings')
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
