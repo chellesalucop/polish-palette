@@ -1,0 +1,935 @@
+/* =========================
+   ARTIST BASE CSS
+   ========================= */
+
+/* CSS Variables for Artist Pages */
+:root {
+    --bistre-brown: #867B18;
+    --white-choco: #EDE6D4;
+    --red-violet: #8C2E3E;
+    --eon-white: #F5F5F5;
+    --ecru-wealth: #f3f3f2;
+    --olive-beige: #B7AA7A;
+    --white-beige: #FFFDF5;
+    --brand-primary: #867B18; /* Bistre Brown */
+    --brand-accent: #B7AA7A;  /* Olive Beige */
+}
+
+/* Base Body Styles */
+body {
+    background-color: #fcfbf7;
+    color: #333;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* --- artist_base.css (Layout Reset) --- */
+
+.layout-wrapper {
+    display: flex; /* Use flex instead of grid for better Bootstrap compatibility */
+    min-height: 100vh;
+    width: 100%;
+}
+
+.client-sidebar {
+    width: 280px;
+    min-width: 280px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    background: var(--white-choco);
+    border-right: 1px solid rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.client-main-content {
+    flex-grow: 1; /* This forces the middle to take up all remaining space */
+    padding: 2rem;
+    background-color: #fcfbf7;
+    overflow-x: hidden;
+}
+
+/* Fix for "Skinny Column" bug in your screenshots */
+.container-fluid.artist-dashboard-fit {
+    width: 100% !important;
+    padding: 0 !important;
+}
+
+/* Fix for the calendar grid stacking vertically */
+#calendarGrid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 2px;
+    text-align: center;
+}
+
+.calendar-day {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 35px;
+}
+
+/* MAXIMUM SPECIFICITY - Override everything */
+body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar {
+    top: 0 !important;
+    height: 100vh !important;
+    position: sticky !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Override sidebar-overlay positioning and ensure it doesn't push down content */
+.sidebar-overlay#sidebarOverlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.5) !important; /* Dark semi-transparent overlay */
+    z-index: 1040 !important; /* Higher than all other elements */
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+    backdrop-filter: blur(2px) !important; /* Subtle blur effect on background */
+}
+
+/* ensure .show state is still visible */
+.sidebar-overlay#sidebarOverlay.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Override any sidebar-nav positioning */
+.sidebar-nav {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    flex: 1;
+}
+
+.floating-mobile-btn {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+}
+
+/* Sidebar links (copied from client layout so artist sidebar matches brand) */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: var(--bistre-brown);
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar-link:hover {
+    transform: none !important;
+    background-color: var(--bistre-brown);
+    color: white !important;
+}
+
+.sidebar-link.active {
+    background-color: var(--bistre-brown);
+    color: white;
+}
+
+.sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--red-violet);
+}
+
+.sidebar-link i {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: var(--bistre-brown);
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-logout:hover {
+    transform: none !important;
+    background-color: var(--bistre-brown);
+    color: white !important;
+}
+
+/* Maintains your manual changes to the identity section blending */
+.artist-identity {
+    background-color: rgba(183, 170, 122, 0.1); 
+}
+
+/* =========================
+   COMMON ARTIST COMPONENTS
+   ========================= */
+
+/* STATUS & SESSION CARDS */
+.status-card-alt, .session-card-alt {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+/* LIST ITEMS: Stationary Hover Fix */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease !important;
+}
+
+.list-group-item:hover {
+    background-color: #f9f8f2 !important;
+    transform: none !important; /* Forces the item to stay still */
+}
+
+/* CALENDAR COMPONENTS */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 15px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+    background: var(--brand-accent);
+    color: white;
+}
+
+.calendar-day.booked {
+    background: var(--brand-primary);
+    color: white;
+}
+
+.calendar-day.today {
+    border: 2px solid var(--brand-primary);
+    color: var(--brand-primary);
+    font-weight: 700;
+}
+
+/* =========================
+   SIDEBAR STYLES
+   ========================= */
+
+.sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 30px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.artist-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.artist-avatar {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.artist-details h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.artist-details small {
+    opacity: 0.8;
+    font-size: 12px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 25px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.nav-item:hover {
+    background: rgba(255,255,255,0.1);
+    padding-left: 30px;
+}
+
+.nav-item.active {
+    background: rgba(255,255,255,0.2);
+    border-left: 4px solid white;
+}
+
+.nav-item.logout {
+    margin-top: auto;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    color: #ff6b6b;
+}
+
+.nav-item.logout:hover {
+    background: rgba(255,107,107,0.2);
+}
+
+.nav-item i {
+    font-size: 18px;
+    width: 20px;
+}
+
+/* =========================
+   DASHBOARD COMPONENTS
+   ========================= */
+
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.content-header h2 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.current-time {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* STATUS SECTION */
+.status-section {
+    margin-bottom: 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.status-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-left: 5px solid #28a745;
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.status-header h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-awaiting {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-service {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-message p {
+    color: #6c757d;
+    margin: 0;
+}
+
+/* SESSION CONTROL */
+.session-section {
+    margin-bottom: 30px;
+}
+
+.session-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-left: 5px solid #ffc107;
+}
+
+.session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.session-header h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.countdown-timer {
+    background: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.client-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.client-avatar {
+    width: 50px;
+    height: 50px;
+    background: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #6c757d;
+}
+
+.client-details h5 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.client-details p {
+    color: #6c757d;
+    margin: 2px 0;
+    font-size: 14px;
+}
+
+.session-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.session-actions .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* PENDING REQUESTS */
+.pending-section {
+    margin-bottom: 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.request-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.request-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.request-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.request-details h5 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.request-details p {
+    color: #6c757d;
+    margin: 2px 0;
+    font-size: 14px;
+}
+
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.request-actions .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* SCHEDULE SECTION */
+.schedule-section {
+    margin-bottom: 30px;
+}
+
+.schedule-list {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.schedule-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.schedule-item:last-child {
+    border-bottom: none;
+}
+
+.time-slot {
+    width: 80px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+.appointment-details {
+    flex: 1;
+    margin-left: 20px;
+}
+
+.appointment-details h5 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.appointment-details p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 13px;
+}
+
+.appointment-status {
+    margin-left: auto;
+}
+
+/* RIGHT SIDEBAR */
+.right-sidebar {
+    width: 320px;
+    background: white;
+    padding: 25px;
+    border-left: 1px solid #e9ecef;
+    overflow-y: auto;
+}
+
+/* CALENDAR */
+.calendar-section {
+    margin-bottom: 30px;
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.calendar-separator {
+    height: 1px;
+    background: #e9ecef;
+    margin: 20px 0;
+}
+
+.current-month {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+    min-width: 100px;
+    text-align: center;
+}
+
+.calendar-day.header {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 11px;
+}
+
+/* BOOKED DATES */
+.booked-dates-section {
+    margin-bottom: 30px;
+}
+
+.booked-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.booked-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.booked-item:hover {
+    background: #e9ecef;
+}
+
+.booked-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+}
+
+.date-day {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1;
+}
+
+.date-month {
+    font-size: 11px;
+    color: #6c757d;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.booked-details {
+    flex: 1;
+}
+
+.booked-details h6 {
+    color: #2c3e50;
+    margin: 0 0 3px 0;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.booked-details small {
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+   ========================= */
+
+@media (max-width: 1200px) {
+    .right-sidebar {
+        width: 280px;
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        order: 2;
+    }
+    
+    .main-content {
+        order: 1;
+    }
+    
+    .right-sidebar {
+        width: 100%;
+        order: 3;
+        border-left: none;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .sidebar-nav {
+        display: flex;
+        overflow-x: auto;
+        padding: 10px;
+    }
+    
+    .nav-item {
+        white-space: nowrap;
+        min-width: 120px;
+    }
+    
+    .client-main-content { 
+        margin-left: 0; 
+    }
+    .floating-mobile-btn { 
+        display: block; 
+    }
+    .sidebar-footer {
+        padding-bottom: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 20px;
+    }
+    
+    .right-sidebar {
+        padding: 20px;
+    }
+    
+    .session-actions {
+        flex-direction: column;
+    }
+    
+    .request-actions {
+        flex-direction: column;
+    }
+    
+    .request-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+/* =========================
+   UNIFIED GRID ARCHITECTURE
+   ========================= */
+
+/* Main Layout Grid - Unified Architecture */
+.layout-wrapper {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    min-height: 100vh;
+    gap: 0;
+    background: var(--eon-white);
+}
+
+/* Column 1: Fixed Navigation */
+.layout-nav {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: linear-gradient(135deg, var(--eon-white) 0%, var(--olive-beige) 100%);
+    border-right: 1px solid var(--bistre-brown);
+    z-index: 10;
+    padding: 1.5rem;
+}
+
+/* Column 2: Flexible Command Center */
+.layout-main {
+    padding: 2rem;
+    overflow-y: auto;
+    background: var(--eon-white);
+}
+
+/* Column 3: Fixed Context Rail */
+.layout-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--eon-white);
+    border-left: 1px solid var(--bistre-brown);
+    padding: 1.5rem;
+}
+
+/* Standardized Card Styles */
+.stat-card {
+    background: white;
+    border: 1px solid var(--bistre-brown);
+    border-top: 4px solid var(--bistre-brown);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.status-card-alt {
+    background: white;
+    border: 1px solid var(--bistre-brown);
+    border-left: 4px solid var(--brand-primary);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Fix - Consolidated */
+.list-group-item:hover {
+    transform: none !important;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: var(--olive-beige);
+    border-color: var(--brand-primary);
+}
+
+/* =========================
+   LAYOUT OVERRIDE
+   The generic .layout-wrapper rule above sets display:grid (3-column)
+   which breaks the page-level layout that only has sidebar + main.
+   This rule restores flex for the outer page wrapper.
+   ========================= */
+.layout-wrapper.client-sidebar-page {
+    display: flex !important;
+    grid-template-columns: unset !important;
+}
+
+/* Mobile: hide sidebar when collapsed (toggled via JS) */
+.client-sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    border: none !important;
+}
+
+/* When sidebar collapses on mobile, main content fills full width */
+.client-main-content.sidebar-collapsed {
+    width: 100%;
+}

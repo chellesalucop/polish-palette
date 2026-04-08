@@ -1,0 +1,33 @@
+{% extends "emails/base_email.html" %}
+{% block content %}
+<h2>Appointment Cancelled</h2>
+<p>Hello {{ recipient_name }},</p>
+<p>{{ cancel_message }}</p>
+
+<div class="detail-card">
+  <div class="detail-row">
+    <span class="detail-label">Service</span>
+    <span class="detail-value">{{ service_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Date</span>
+    <span class="detail-value">{{ appointment_date }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Time</span>
+    <span class="detail-value">{{ appointment_time }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Status</span>
+    <span class="detail-value"><span class="status-badge status-cancelled">Cancelled</span></span>
+  </div>
+</div>
+
+{% if rebook_url %}
+<p>You can book a new appointment at your convenience.</p>
+<a href="{{ rebook_url }}" class="cta-btn">Book New Appointment</a>
+{% endif %}
+
+<hr class="divider">
+<p style="font-size: 13px; color: #888;">If you have questions, please contact us at polishpalette@gmail.com.</p>
+{% endblock %}

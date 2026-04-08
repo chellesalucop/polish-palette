@@ -1,0 +1,455 @@
+{% extends 'booking/client_base.html' %}
+{% load static %}
+
+{% block title %}Book Your Nail Appointment - Polish Palette{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/clientDashboardNew.css' %}">
+<link rel="stylesheet" href="{% static 'css/booking_form.css' %}">
+<style>
+    /* Fix for Step 3 conditional display */
+    .hidden {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-hero">
+    <div class="dashboard-hero-overlay">
+        <div class="dashboard-hero-content">
+            <h1 class="dashboard-title">Book Your Appointment</h1>
+            <p class="dashboard-subtitle">Build your custom nail set and schedule your appointment</p>
+        </div>
+    </div>
+</section>
+
+<div class="dashboard-content">
+    <div class="container">
+
+        <div class="booking-steps">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Service</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Complexity</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Design</div>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Artist</div>
+            </div>
+            <div class="step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Schedule</div>
+            </div>
+            <div class="step" data-step="6">
+                <div class="step-number">6</div>
+                <div class="step-label">Confirm</div>
+            </div>
+        </div>
+
+        <div class="selection-summary" id="selectionSummary">
+            <div class="summary-card">
+                <h3 class="summary-title">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Your Selection
+                </h3>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span class="summary-label">Service:</span>
+                        <span class="summary-value" id="selectedService">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Complexity:</span>
+                        <span class="summary-value" id="selectedComplexity">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Artist:</span>
+                        <span class="summary-value" id="selectedArtist">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Price:</span>
+                        <span class="summary-value price" id="selectedPrice">₱0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span class="summary-value" id="selectedDateDisplay">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Time:</span>
+                        <span class="summary-value" id="selectedTimeDisplay">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Design:</span>
+                        <span class="summary-value" id="selectedDesign">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-form-container">
+            <form method="POST" enctype="multipart/form-data" id="bookingForm" action="{% url 'booking_create' %}">
+                {% csrf_token %}
+
+                <div class="booking-step active" id="step-1">
+                    <h2 class="step-title">Select Your Service Type</h2>
+                    <div class="service-selection">
+                        <div class="builder-category-grid">
+                            <div class="service-category" data-category="gel_polish">
+                                <div class="service-image">
+                                    <img src="{% static 'images/services/cardGelpolish.jpg' %}" alt="Gel Polish">
+                                    <span class="service-price">₱350</span>
+                                </div>
+                                <div class="service-info">
+                                    <h3>Gel Polish</h3>
+                                    <p>Natural nail overlay service. Perfect for strengthening and beautifying your
+                                        natural nails.</p>
+                                    <span class="duration">40 minutes active + 20 minutes sanitation</span>
+                                </div>
+                            </div>
+
+                            <div class="service-category" data-category="soft_gel_extensions">
+                                <div class="service-image">
+                                    <img src="{% static 'images/services/cardExtension.jpg' %}"
+                                        alt="Soft-Gel Extensions">
+                                    <span class="service-price">₱800</span>
+                                </div>
+                                <div class="service-info">
+                                    <h3>Soft-Gel Extensions</h3>
+                                    <p>Tip application + overlay service. Ideal for adding length and strength to your
+                                        natural nails.</p>
+                                    <span class="duration">40 minutes active + 20 minutes sanitation</span>
+                                </div>
+                            </div>
+
+                            <div class="service-category" data-category="removal">
+                                <div class="service-image">
+                                    <img src="{% static 'images/services/cardRemoval.jpg' %}" alt="Removal">
+                                    <span class="service-price">₱0</span>
+                                </div>
+                                <div class="service-info">
+                                    <h3>Removal</h3>
+                                    <p>Safe and gentle removal of existing nail enhancements.</p>
+                                    <span class="duration">10 minutes active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="phase-navigation">
+                        <button type="button" class="nav-btn prev-btn" disabled>
+                            <i class="bi bi-arrow-left"></i>
+                            Previous
+                        </button>
+                        <button type="button" class="nav-btn next-btn"
+                            onclick="if(bookingStepNavigation.validateCurrentStep()) bookingStepNavigation.nextStep()">
+                            Next
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-2">
+                    <h2 class="step-title">Choose Complexity Level</h2>
+
+                    <div class="complexity-section">
+                        <div class="complexity-grid" id="complexity-grid-default">
+                            <div class="complexity-option" data-complexity="plain" data-price="0">
+                                <div class="complexity-name">Plain</div>
+                                <div class="complexity-desc">1-2 Base Colors only</div>
+                                <div class="complexity-price">₱0</div>
+                            </div>
+
+                            <div class="complexity-option" data-complexity="minimal" data-price="250">
+                                <div class="complexity-name">Minimal</div>
+                                <div class="complexity-desc">Simple line art + chrome</div>
+                                <div class="complexity-price">₱250</div>
+                            </div>
+
+                            <div class="complexity-option" data-complexity="full" data-price="650">
+                                <div class="complexity-name">Full</div>
+                                <div class="complexity-desc">Line art, chromes, rhinestones, charms, 3D Art</div>
+                                <div class="complexity-price">₱650</div>
+                            </div>
+
+                            <div class="complexity-option" data-complexity="advanced" data-price="1200">
+                                <div class="complexity-name">Advanced</div>
+                                <div class="complexity-desc">High-complexity intricate details, hand-painted</div>
+                                <div class="complexity-price">₱1200</div>
+                            </div>
+                        </div>
+
+                        <div class="complexity-grid hidden" id="complexity-grid-removal">
+                            <div class="complexity-option" data-complexity="gel_polish_removal" data-price="150">
+                                <div class="complexity-name">Gel Polish Removal</div>
+                                <div class="complexity-desc">Removal of basic gel polish</div>
+                                <div class="complexity-price">₱150</div>
+                            </div>
+
+                            <div class="complexity-option" data-complexity="extensions_removal" data-price="200">
+                                <div class="complexity-name">Extenstions Removal</div>
+                                <div class="complexity-desc">Removal of complex design including rhinestones and extensions</div>
+                                <div class="complexity-price">₱200</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="phase-navigation">
+                        <button type="button" class="nav-btn prev-btn" onclick="bookingStepNavigation.previousStep()">
+                            <i class="bi bi-arrow-left"></i>
+                            Previous
+                        </button>
+                        <button type="button" class="nav-btn next-btn"
+                            onclick="if(bookingStepNavigation.validateCurrentStep()) bookingStepNavigation.nextStep()">
+                            Next
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-3">
+                    <h2 class="step-title">Choose Your Design Reference</h2>
+
+                    <div class="reference-section" id="referenceSection"
+                        style="padding: 1.5rem; background: #fff; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 2rem;">
+                        <h2 style="color: var(--olive-drab); font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem;">
+                            Phase 3: Inspiration Source</h2>
+
+                        <div class="reference-options"
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                            <div class="reference-option" data-reference="upload"
+                                style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: #2d3436; font-weight: 600;">
+                                    <input type="radio" name="ref_choice" id="refYes" style="accent-color: var(--red-violet); transform: scale(1.2);">
+                                    <label for="refYes" style="cursor: pointer;">Yes - I have my own reference</label>
+                                </div>
+                            </div>
+
+                            <div class="reference-option" data-reference="gallery"
+                                style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: #2d3436; font-weight: 600;">
+                                    <input type="radio" name="ref_choice" id="refNo" style="accent-color: var(--red-violet); transform: scale(1.2);">
+                                    <label for="refNo" style="cursor: pointer;">No - I will pick from artist gallery</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reference-content hidden" id="uploadSection">
+                            <div class="file-upload" style="border: 2px dashed #adb5bd; border-radius: 8px; padding: 2rem; text-align: center; position: relative;">
+                                <input type="file" id="referenceFile" name="reference_file" accept="image/*" style="display: none;">
+                                <label for="referenceFile" class="upload-label" style="cursor: pointer; color: #6c757d;">
+                                    <div id="uploadPlaceholder">
+                                        <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: var(--red-violet); margin-bottom: 0.5rem;"></i>
+                                        <p style="margin-bottom: 0; font-weight: 500;">Click to upload your design reference</p>
+                                        <small style="font-size: 0.8rem; color: #636e72; display: block; margin-top: 0.5rem;">Maximum file size: 2MB. Image formats only.</small>
+                                    </div>
+                                    <div id="uploadSuccessIndicator" class="hidden" style="color: #27ae60;">
+                                        <i class="bi bi-check-circle-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                        <p style="margin-bottom: 0; font-weight: 600;">Image Uploaded Successfully!</p>
+                                        <p id="fileNameDisplay" style="font-size: 0.85rem; color: #636e72;"></p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="reference-content hidden" id="gallerySection">
+                            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">Pick one inspiration from the artist portfolio.</p>
+                            <div class="gallery-grid" id="galleryGrid">
+                                {% for design in gallery_designs %}
+                                    <div class="gallery-item" data-image-id="{{ design.id }}" data-design-title="{{ design.title }}">
+                                        <img src="{{ design.image.url|default:design.image_url }}" alt="{{ design.title }}">
+                                    </div>
+                                {% empty %}
+                                    <p style="color: #adb5bd; font-style: italic; grid-column: 1 / -1; text-align: center;">No gallery designs available yet.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="design-note-section hidden" id="designNoteSection" style="margin-top: 2rem;">
+                            <label for="designNote" style="font-weight: 600; color: #495057; display: block; margin-bottom: 0.5rem; font-size: 0.95rem;">Design Note (optional)</label>
+                            <textarea id="designNote" name="custom_art_description" rows="4" style="width: 100%; border: 1px solid #ced4da; border-radius: 6px; padding: 0.75rem; font-size: 0.95rem; resize: vertical;" placeholder="Add details for the artist..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="phase-navigation">
+                        <button type="button" class="nav-btn prev-btn" onclick="bookingStepNavigation.previousStep()">
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="nav-btn next-btn" onclick="if(bookingStepNavigation.validateCurrentStep()) bookingStepNavigation.nextStep()">
+                            Next <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-4">
+                    <h2 class="step-title">Choose Your Artist</h2>
+
+                    <div class="form-group">
+                        <label for="artist">Preferred Artist</label>
+                        <select name="artist" id="artist" required>
+                            <option value="">Select an artist</option>
+                            {% for artist_data in artists_with_ratings %}
+                            <option value="{{ artist_data.artist.id }}">
+                                {{ artist_data.artist.get_full_name }} 
+                                {% if artist_data.avg_rating > 0 %}
+                                    ({{ artist_data.avg_rating|floatformat:1 }} ⭐, {{ artist_data.total_reviews }} review{{ artist_data.total_reviews|pluralize }})
+                                {% else %}
+                                    (No reviews yet)
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="phase-navigation">
+                        <button type="button" class="nav-btn prev-btn" onclick="bookingStepNavigation.previousStep()">
+                            <i class="bi bi-arrow-left"></i>
+                            Previous
+                        </button>
+                        <button type="button" class="nav-btn next-btn"
+                            onclick="if(bookingStepNavigation.validateCurrentStep()) bookingStepNavigation.nextStep()">
+                            Next
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-5">
+                    <h2 class="step-title">Schedule Your Appointment</h2>
+
+                    <div class="datetime-section" style="background: transparent; border: none; padding: 0;">
+                        <input type="hidden" id="appointment_date" name="appointment_date" required>
+                        <input type="hidden" id="appointment_time" name="appointment_time" required>
+
+                        <div class="datetime-grid">
+                            <div class="calendar-container">
+                                <div class="calendar-header">
+                                    <button type="button" class="calendar-nav" id="prevMonth"><i
+                                            class="bi bi-chevron-left"></i></button>
+                                    <h5 class="calendar-month" id="calendarMonthDisplay">Month Year</h5>
+                                    <button type="button" class="calendar-nav" id="nextMonth"><i
+                                            class="bi bi-chevron-right"></i></button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <div class="weekday">Sun</div>
+                                    <div class="weekday">Mon</div>
+                                    <div class="weekday">Tue</div>
+                                    <div class="weekday">Wed</div>
+                                    <div class="weekday">Thu</div>
+                                    <div class="weekday">Fri</div>
+                                    <div class="weekday">Sat</div>
+                                </div>
+                                <div class="calendar-days" id="calendarDaysGrid">
+                                    </div>
+                            </div>
+
+                            <div class="time-slots-container hidden" id="timeSlotsContainer">
+                                <h3>Available Times</h3>
+                                <div class="time-slots" id="timeSlotsGrid">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="phase-navigation">
+                        <button type="button" class="nav-btn prev-btn" onclick="bookingStepNavigation.previousStep()">
+                            <i class="bi bi-arrow-left"></i>
+                            Previous
+                        </button>
+                        <button type="button" class="nav-btn next-btn"
+                            onclick="if(bookingStepNavigation.validateCurrentStep()) bookingStepNavigation.nextStep()">
+                            Next
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-6">
+                    <h2 class="step-title">Confirm Your Booking</h2>
+
+                    <div class="summary-section">
+                        <h3>Booking Details</h3>
+                        <div class="summary-item">
+                            <span class="label">Service:</span>
+                            <span class="value" id="summary-service">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Complexity:</span>
+                            <span class="value" id="summary-complexity">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Design:</span>
+                            <span class="value" id="summary-design">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Artist:</span>
+                            <span class="value" id="summary-artist">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Date:</span>
+                            <span class="value" id="summary-date">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Time:</span>
+                            <span class="value" id="summary-time">-</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span class="label">Total Amount Due:</span>
+                            <span class="value" id="summary-price">-</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Cancel
+                        </a>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="acknowledge48Hour" required>
+                            <label class="form-check-label" for="acknowledge48Hour">
+                                <strong>[X]</strong> I acknowledge that I can only Re-Schedule or Cancel my appointment
+                                up to 2 days (48 hours) before the start time.
+                            </label>
+                        </div>
+
+                        <div class="phase-navigation">
+                            <button type="button" class="nav-btn prev-btn"
+                                onclick="bookingStepNavigation.previousStep()">
+                                <i class="bi bi-arrow-left"></i>
+                                Previous
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                <i class="bi bi-check-circle"></i>
+                                Confirm Booking
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="service_category" id="serviceCategory" value="">
+                <input type="hidden" name="complexity_level" id="complexityLevel" value="">
+                <input type="hidden" name="tip_code" id="tipCode" value="">
+                <input type="hidden" name="reference_type" id="referenceType" value="">
+                <input type="hidden" name="gallery_image_id" id="galleryImageId" value="">
+                <input type="hidden" name="total_price" id="totalPrice" value="0">
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.bookedSlotsData = JSON.parse('{{ booked_slots_json|escapejs }}');
+</script>
+
+<script src="{% static 'js/booking_form.js' %}"></script>
+<script src="{% static 'js/dynamic_booking.js' %}"></script>
+
+{% endblock %}

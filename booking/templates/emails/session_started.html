@@ -1,0 +1,44 @@
+{% extends "emails/base_email.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Service Started</h2>
+<p>Hello <strong>{{ client_name }}</strong>,</p>
+<p>Your nail service is now <strong>in progress</strong> with <strong>{{ artist_name }}</strong>!</p>
+
+<div class="detail-card">
+  <div class="detail-row">
+    <span class="detail-label">Service</span>
+    <span class="detail-value">{{ service_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Artist</span>
+    <span class="detail-value">{{ artist_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Start Time</span>
+    <span class="detail-value">{{ start_time }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Status</span>
+    <span class="detail-value">
+      <span class="status-badge status-ongoing">Session In Progress</span>
+    </span>
+  </div>
+</div>
+
+<p><strong>📍 Please head inside now!</strong></p>
+<p>Your artist is waiting for you. Please proceed to the service area for your appointment.</p>
+
+<p><strong>Session Information:</strong></p>
+<ul>
+  <li>Your session is now active</li>
+  <li>Estimated duration: 60-90 minutes</li>
+  <li>Artist: {{ artist_name }}</li>
+  <li>Service: {{ service_name }}</li>
+</ul>
+
+<hr class="divider">
+
+<p style="text-align: center; font-style: italic;">Enjoy your pampering session at Polish Palette!</p>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "booking/artist_base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-0 text-dark">Artist Override: Reschedule</h4>
+                        <a href="{% url 'artist_dashboard' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Cancel</a>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="alert alert-warning border-0 rounded-3 d-flex align-items-center mb-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
+                        <div>
+                            <strong>Master Privilege Active</strong><br>
+                            You are manually rescheduling an appointment for <b>{{ appointment.client.get_full_name }}</b>. This bypasses the 48-hour and same-day lock rules. A master audit log will be recorded.
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <h6 class="fw-bold text-muted mb-3">Current Appointment Details</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Service</small>
+                                <span class="fw-semibold">{{ appointment.service.name }}</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Current Date/Time</small>
+                                <span class="fw-semibold">{{ appointment.date|date:"M d, Y" }} at {{ appointment.time|time:"g:i A" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="rescheduleDate" class="form-label fw-semibold">New Date</label>
+                            <input type="date" class="form-control form-control-lg bg-light border-0" id="rescheduleDate" name="date" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="rescheduleTime" class="form-label fw-semibold">New Time</label>
+                            <input type="time" class="form-control form-control-lg bg-light border-0" id="rescheduleTime" name="time" required step="3600" min="10:00" max="20:00">
+                            <div class="form-text text-muted mt-2"><i class="bi bi-info-circle me-1"></i>Please select an hourly slot (10:00 AM - 8:00 PM).</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark btn-lg w-100 rounded-pill shadow-sm" onclick="return confirm('Are you sure you want to force this reschedule?');">
+                            Confirm Master Override
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

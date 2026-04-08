@@ -1,0 +1,963 @@
+{% extends "booking/client_base.html" %}
+{% load static %}
+
+{% block title %}Booking History{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/client_history.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="history-page">
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="history-page-header">
+            <h1><i class="bi bi-clock-history"></i> Booking History</h1>
+            <p class="history-subtitle">View all your past and upcoming appointments</p>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="filter-container">
+            <div class="filter-pills">
+                <a href="?status=all" class="filter-pill {% if current_filter == 'all' %}active{% endif %}">
+                    <i class="bi bi-grid-3x3-gap"></i> All
+                </a>
+                <a href="?status=completed" class="filter-pill {% if current_filter == 'completed' %}active{% endif %}">
+                    <i class="bi bi-check-circle"></i> Completed
+                </a>
+                <a href="?status=upcoming" class="filter-pill {% if current_filter == 'upcoming' %}active{% endif %}">
+                    <i class="bi bi-hourglass-split"></i> Upcoming
+                </a>
+                <a href="?status=cancelled" class="filter-pill {% if current_filter == 'cancelled' %}active{% endif %}">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </div>
+
+        <!-- History List -->
+        {% if history %}
+        <div class="history-list">
+            {% for appointment in history %}
+            <div class="history-card review-toggle" data-appointment-id="{{ appointment.id }}">
+                <div class="date-badge">
+                    <span class="date-month">{{ appointment.date|date:"M" }}</span>
+                    <span class="date-day">{{ appointment.date|date:"d" }}</span>
+                    <span class="date-year">{{ appointment.date|date:"Y" }}</span>
+                </div>
+                <div class="appointment-content">
+                    <div class="appointment-header">
+                        <h4 class="history-service-name">{{ appointment.service.name }}</h4>
+                        <div class="appointment-meta">
+                            <span class="meta-item">
+                                <i class="bi bi-clock"></i> {{ appointment.time|time:"g:i A" }}
+                            </span>
+                            <span class="meta-item">
+                                <i class="bi bi-stopwatch"></i> {{ appointment.service.duration }} mins
+                            </span>
+                            <span class="meta-item price">
+                                <i class="bi bi-tag"></i> ₱{{ appointment.service.price }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="appointment-footer">
+                        <div class="artist-info">
+                            <i class="bi bi-person-circle"></i>
+                            <a href="{% url 'artist_public_reviews' appointment.artist.id %}" class="artist-public-link">
+                                {{ appointment.artist.user.get_full_name }}
+                            </a>
+                            {% if appointment.artist.avg_rating > 0 %}
+                            <span class="artist-rating-inline">
+                                <i class="bi bi-star-fill"></i> {{ appointment.artist.avg_rating|floatformat:1 }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="timestamp-info">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar-plus"></i> 
+                                Booked: {{ appointment.created_at|date:"M d, Y" }} at {{ appointment.created_at|time:"g:i A" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="history-action-col">
+                    {% if appointment.status == 'Finished' %}
+                        {% if appointment.existing_review %}
+                            <a href="{% url 'client_review_edit' appointment.existing_review.id %}" class="rebook-btn">
+                                <i class="bi bi-pencil-square"></i> Edit Review
+                            </a>
+                            <form method="POST" action="{% url 'client_review_delete' appointment.existing_review.id %}" class="delete-review-form">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-review-btn" onclick="return confirm('Delete your review for this booking?');">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'client_review_create' appointment.id %}" class="rebook-btn">
+                                <i class="bi bi-star-fill"></i> Rate Now
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    {% if appointment.status == 'Waiting' %}
+                        {% if appointment.is_within_48_hours %}
+                        <a href="mailto:{{ appointment.artist.user.email }}"
+                           class="rebook-btn btn-contact"
+                           style="background: #ff5252; color: #fff; border:none;"
+                           onclick="alert('Appointments cannot be rescheduled within 48 hours of the new date through the automated system to ensure artist preparation. For urgent last-minute changes, please contact the studio directly via the Contact Artist button.');">
+                            <i class="bi bi-envelope me-1"></i> Contact
+                        </a>
+                        {% else %}
+                        <button type="button"
+                            class="rebook-btn open-reschedule-modal"
+                            data-id="{{ appointment.id }}"
+                            data-service="{{ appointment.service.name }}"
+                            data-artist="{{ appointment.artist.id }}"
+                            data-date="{{ appointment.date|date:'Y-m-d' }}"
+                            data-time="{{ appointment.time|time:'H:i' }}"
+                            data-appointment-datetime="{{ appointment.date|date:'Y-m-d' }}T{{ appointment.time|time:'H:i' }}"
+                            style="border:none; cursor:pointer;">
+                            <i class="bi bi-arrow-clockwise"></i> Reschedule
+                        </button>
+                        {% endif %}
+                        {% if appointment.status == 'Waiting' %}
+                            <form method="POST" action="{% url 'cancel_appointment' appointment.id %}" class="delete-review-form" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-review-btn" onclick="return confirm('Are you sure you want to cancel this appointment? This action cannot be undone.');">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                            </form>
+                        {% else %}
+                            <button type="button" class="delete-review-btn" onclick="alert('Appointments that have been Approved can no longer be cancelled automatically. Please contact the artist to request a cancellation.');">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                        {% endif %}
+                    {% elif appointment.status == 'Approved' %}
+                        <a href="mailto:{{ appointment.artist.user.email|default:appointment.artist.email }}"
+                           class="rebook-btn btn-contact"
+                           style="background: #ff5252; color: #fff; border:none;">
+                            <i class="bi bi-envelope me-1"></i> Contact
+                        </a>
+                    {% elif appointment.status == 'Rescheduling' %}
+                        <button type="button"
+                            class="rebook-btn open-reschedule-modal"
+                            data-id="{{ appointment.id }}"
+                            data-service="{{ appointment.service.name }}"
+                            data-artist="{{ appointment.artist.id }}"
+                            data-date="{{ appointment.date|date:'Y-m-d' }}"
+                            data-time="{{ appointment.time|time:'H:i' }}"
+                            data-resume="true"
+                            data-lock-expires="{{ appointment.reschedule_lock_expires_at|date:'c' }}"
+                            style="border:none; cursor:pointer;">
+                            <i class="bi bi-arrow-clockwise"></i> Resume
+                        </button>
+                        <button type="button"
+                            class="delete-review-btn abort-reschedule-btn"
+                            data-id="{{ appointment.id }}"
+                            style="border:none; cursor:pointer; background:transparent;">
+                            <i class="bi bi-x-circle"></i> Abort
+                        </button>
+                    {% endif %}
+                    {% if appointment.status == 'Finished' %}
+                        <span class="status-badge finished-badge"><i class="bi bi-check-circle-fill"></i> Completed</span>
+                    {% elif appointment.status == 'Cancelled' %}
+                        <span class="status-badge cancelled-badge"><i class="bi bi-x-circle-fill"></i> Cancelled</span>
+                    {% elif appointment.status == 'Rejected' %}
+                        <span class="status-badge cancelled-badge"><i class="bi bi-x-circle-fill"></i> Cancelled</span>
+                    {% elif appointment.status == 'Waiting' %}
+                        <span class="status-badge waiting-badge"><i class="bi bi-clock-fill"></i> Waiting</span>
+                    {% elif appointment.status == 'Approved' %}
+                        <span class="status-badge approved-badge"><i class="bi bi-calendar-check-fill"></i> Approved</span>
+                    {% elif appointment.status == 'Rescheduling' %}
+                        <span class="status-badge rescheduling-badge" style="background: #cce5ff; color: #004085; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem;"><i class="bi bi-arrow-repeat me-1"></i> Rescheduling</span>
+                    {% elif appointment.status == 'On-going' %}
+                        <span class="status-badge ongoing-badge"><i class="bi bi-stars"></i> On-going</span>
+                    {% endif %}
+                    
+                    <!-- Status Change Timestamp -->
+                    <div class="status-timestamp">
+                        <small class="text-muted">
+                            <i class="bi bi-clock-history"></i> 
+                            {{ appointment.status_action }}: {{ appointment.status_changed_at|date:"M d, Y" }} at {{ appointment.status_changed_at|time:"g:i A" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            {% if appointment.existing_review %}
+            <div class="history-review-section standalone" id="review-{{ appointment.id }}" style="display: none;">
+                <div class="review-summary">
+                    <div class="review-rating">
+                        {% for _ in "12345" %}
+                            {% if forloop.counter <= appointment.existing_review.rating %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                            {% else %}
+                                <i class="bi bi-star text-muted"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="review-date">{{ appointment.existing_review.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    {% if appointment.existing_review.comment %}
+                    <div class="review-comment">
+                        <strong>Me:</strong> {{ appointment.existing_review.comment }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if appointment.existing_review.artist_reply %}
+                    <div class="artist-reply-section">
+                        <div class="artist-reply-header">
+                            <i class="bi bi-reply-fill"></i>
+                            <strong>{{ appointment.artist.user.get_full_name }} replied:</strong>
+                            <span class="reply-date">{{ appointment.existing_review.artist_replied_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="artist-reply-content">
+                            {{ appointment.existing_review.artist_reply }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-history">
+            <div class="empty-icon">
+                <i class="bi bi-calendar-heart"></i>
+            </div>
+            <h3>No matching records</h3>
+            <p>
+                {% if current_filter == 'completed' %}
+                    You haven't completed any appointments yet.
+                {% elif current_filter == 'cancelled' %}
+                    No cancelled appointments — great record!
+                {% elif current_filter == 'upcoming' %}
+                    No upcoming appointments scheduled.
+                {% else %}
+                    Your booking history will appear here once you make your first appointment.
+                {% endif %}
+            </p>
+            <div class="empty-actions">
+                <a href="{% url 'booking_create' %}" class="empty-btn primary">
+                    <i class="bi bi-plus-circle"></i> Book a Session
+                </a>
+                <a href="{% url 'services' %}" class="empty-btn secondary">
+                    <i class="bi bi-grid"></i> Browse Services
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Contact Artist Modal -->
+<div class="modal fade" id="contactArtistModal" tabindex="-1" aria-labelledby="contactArtistModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="contactArtistModalLabel">
+                    <i class="bi bi-telephone me-2"></i>Contact Your Artist
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>48-Hour Reschedule Lock Active</strong><br>
+                    Your appointment is within 48 hours. Please contact your artist directly for any changes.
+                </div>
+                
+                <div class="appointment-details mb-3">
+                    <h6>Appointment Details:</h6>
+                    <div id="modalAppointmentInfo">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="contact-options">
+                    <h6>Contact Options:</h6>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success" id="callArtistBtn">
+                            <i class="bi bi-telephone-fill me-2"></i>Call Artist
+                        </button>
+                        <button type="button" class="btn btn-primary" id="textArtistBtn">
+                            <i class="bi bi-chat-dots-fill me-2"></i>Send Text Message
+                        </button>
+                        <button type="button" class="btn btn-info text-white" id="messageArtistBtn">
+                            <i class="bi bi-messenger me-2"></i>Send Messenger Message
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="message-template mt-3">
+                    <h6>Message Template:</h6>
+                    <textarea class="form-control" id="messageTemplate" rows="4" readonly></textarea>
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="copyMessageBtn">
+                        <i class="bi bi-clipboard me-1"></i>Copy Message
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     RESCHEDULE MODAL
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="rescheduleModal" class="reschedule-modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="rescheduleModalTitle">
+    <div class="reschedule-modal-box">
+
+        <!-- Header -->
+        <div class="reschedule-modal-header">
+            <h4 id="rescheduleModalTitle"><i class="bi bi-arrow-clockwise me-2"></i>Reschedule Appointment</h4>
+            <button class="reschedule-modal-close" id="rescheduleModalClose" aria-label="Close">&times;</button>
+        </div>
+
+        <!-- Countdown banner -->
+        <div class="reschedule-countdown-bar" id="rescheduleCountdownBar" style="display: none;">
+            <i class="bi bi-hourglass-split me-1"></i>
+            <span>Time remaining: <strong id="rescheduleCountdownDisplay">15:00</strong></span>
+            <span class="ms-2 text-muted" style="font-size:12px;">Your original slot is held until the timer runs out.</span>
+        </div>
+
+        <!-- Step 1: Choose date -->
+        <div id="rescheduleStep1" class="reschedule-step active">
+            <p class="reschedule-label">Select a new date for <strong id="rescheduleServiceName"></strong>:</p>
+            <div class="reschedule-calendar-nav">
+                <button id="reschedCalPrev" type="button"><i class="bi bi-chevron-left"></i></button>
+                <span id="reschedCalMonth"></span>
+                <button id="reschedCalNext" type="button"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div id="reschedCalGrid" class="reschedule-cal-grid"></div>
+        </div>
+
+        <!-- Step 2: Choose time -->
+        <div id="rescheduleStep2" class="reschedule-step" style="display:none;">
+            <button type="button" id="reschedBackToDate" class="reschedule-back-btn"><i class="bi bi-arrow-left me-1"></i>Back</button>
+            <p class="reschedule-label">Select a time slot for <strong id="rescheduleSelectedDate"></strong>:</p>
+            <div id="reschedTimeSlots" class="reschedule-time-grid"></div>
+        </div>
+
+        <!-- Step 3: Confirm -->
+        <div id="rescheduleStep3" class="reschedule-step" style="display:none;">
+            <div class="reschedule-confirm-summary">
+                <i class="bi bi-calendar-check" style="font-size:2rem;color:var(--red-violet);"></i>
+                <div class="reschedule-confirm-text">
+                    <p>You are moving your appointment to:</p>
+                    <strong id="rescheduleConfirmDetails"></strong>
+                </div>
+            </div>
+            <div class="reschedule-confirm-actions">
+                <button type="button" id="reschedBackToTime" class="reschedule-back-btn"><i class="bi bi-arrow-left me-1"></i>Back</button>
+                <button type="button" id="rescheduleConfirmBtn" class="reschedule-confirm-btn">
+                    <i class="bi bi-check-circle me-1"></i> Confirm Reschedule
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- End reschedule modal -->
+
+<!-- Contact Artist Modal JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contactArtistModal = document.getElementById('contactArtistModal');
+    const callArtistBtn = document.getElementById('callArtistBtn');
+    const textArtistBtn = document.getElementById('textArtistBtn');
+    const messageArtistBtn = document.getElementById('messageArtistBtn');
+    const messageTemplate = document.getElementById('messageTemplate');
+    const copyMessageBtn = document.getElementById('copyMessageBtn');
+    
+    let currentAppointment = null;
+    
+    // Store current appointment when modal is shown
+    if (contactArtistModal) {
+        contactArtistModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            currentAppointment = {
+                id: button.dataset.id,
+                service: button.dataset.service,
+                artist: button.dataset.artist,
+                date: button.dataset.date,
+                time: button.dataset.time,
+                clientName: '{{ request.user.get_full_name|default:"Client" }}'
+            };
+            
+            // Populate appointment details
+            const appointmentInfo = document.getElementById('modalAppointmentInfo');
+            if (appointmentInfo) {
+                appointmentInfo.innerHTML = `
+                    <div class="row">
+                        <div class="col-6"><strong>Service:</strong></div>
+                        <div class="col-6">${currentAppointment.service}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><strong>Date:</strong></div>
+                        <div class="col-6">${new Date(currentAppointment.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><strong>Time:</strong></div>
+                        <div class="col-6">${currentAppointment.time}</div>
+                    </div>
+                `;
+            }
+            
+            // Generate message template
+            generateMessageTemplate();
+        });
+    }
+    
+    // Generate pre-filled message
+    function generateMessageTemplate() {
+        if (!currentAppointment || !messageTemplate) return;
+        
+        const message = `Hi! This is ${currentAppointment.clientName}. I'm contacting you regarding my ${currentAppointment.service} booking on ${new Date(currentAppointment.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${currentAppointment.time}. I need to reschedule this appointment due to a personal matter. Please let me know if we can find an alternative time. Thank you!`;
+        
+        messageTemplate.value = message;
+    }
+    
+    // Call Artist button
+    if (callArtistBtn) {
+        callArtistBtn.addEventListener('click', function() {
+            // Get artist phone number from backend or use placeholder
+            const artistPhone = '+639123456789'; // This should come from backend
+            window.location.href = `tel:${artistPhone}`;
+        });
+    }
+    
+    // Text Artist button
+    if (textArtistBtn) {
+        textArtistBtn.addEventListener('click', function() {
+            const artistPhone = '+639123456789'; // This should come from backend
+            const message = encodeURIComponent(messageTemplate.value);
+            window.location.href = `sms:${artistPhone}?body=${message}`;
+        });
+    }
+    
+    // Messenger button
+    if (messageArtistBtn) {
+        messageArtistBtn.addEventListener('click', function() {
+            const messengerUrl = 'https://m.me/polishpalette'; // This should come from backend
+            window.open(messengerUrl, '_blank');
+        });
+    }
+    
+    // Copy message button
+    if (copyMessageBtn) {
+        copyMessageBtn.addEventListener('click', function() {
+            messageTemplate.select();
+            document.execCommand('copy');
+            
+            // Show success feedback
+            const originalText = copyMessageBtn.innerHTML;
+            copyMessageBtn.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
+            copyMessageBtn.classList.remove('btn-outline-secondary');
+            copyMessageBtn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                copyMessageBtn.innerHTML = originalText;
+                copyMessageBtn.classList.remove('btn-success');
+                copyMessageBtn.classList.add('btn-outline-secondary');
+            }, 2000);
+        });
+    }
+});
+</script>
+
+<script>
+const BOOKED_SLOTS = {{ booked_slots_json|safe }};
+function getCsrfToken() {
+    return document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Filter pills ────────────────────────────────────────────────────────
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const sections = document.querySelectorAll('.appointments-section');
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', function () {
+            filterPills.forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            sections.forEach(s => s.style.display = 'none');
+            document.getElementById(`${this.dataset.filter}-section`).style.display = 'block';
+        });
+    });
+
+    // ── Abort reschedule buttons ─────────────────────────────────────────────
+    document.querySelectorAll('.abort-reschedule-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (!confirm('Cancel the reschedule? Your original slot will be kept.')) return;
+            const id = this.dataset.id;
+            apiFetch(`/appointment/${id}/reschedule/abort/`, {}).then(() => {
+                window.location.href = '/history/';
+            }).catch(err => alert(err.message || 'Error aborting reschedule.'));
+        });
+    });
+
+    // ── Open reschedule modal ────────────────────────────────────────────────
+    document.querySelectorAll('.open-reschedule-modal').forEach(btn => {
+        btn.addEventListener('click', function () {
+            openRescheduleModal(this);
+        });
+    });
+
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RESCHEDULE MODAL LOGIC
+// ══════════════════════════════════════════════════════════════════════════════
+
+let reschedState = {
+    appointmentId: null,
+    artistId: null,
+    selectedDate: null,    // 'YYYY-MM-DD'
+    selectedTime: null,    // 'HH:MM'
+    lockExpiresAt: null,   // ISO date string
+    calYear: null,
+    calMonth: null,
+    countdownInterval: null,
+};
+
+const modal = document.getElementById('rescheduleModal');
+const step1 = document.getElementById('rescheduleStep1');
+const step2 = document.getElementById('rescheduleStep2');
+const step3 = document.getElementById('rescheduleStep3');
+
+function showStep(n) {
+    [step1, step2, step3].forEach((s, i) => s.style.display = i + 1 === n ? 'block' : 'none');
+}
+
+async function openRescheduleModal(btn) {
+    const id = btn.dataset.id;
+    const artistId = btn.dataset.artist;
+    const isResume = btn.dataset.resume === 'true';
+    const lockExpires = btn.dataset.lockExpires || null;
+
+    document.getElementById('rescheduleServiceName').textContent = btn.dataset.service;
+    reschedState.appointmentId = id;
+    reschedState.artistId = artistId;
+    reschedState.selectedDate = null;
+    reschedState.selectedTime = null;
+
+    const today = new Date();
+    reschedState.calYear = today.getFullYear();
+    reschedState.calMonth = today.getMonth();
+
+    if (!isResume) {
+        const policyWarning = "Rescheduling Policy Warning:\n\n" +
+                              "• You can only reschedule once per appointment without penalty.\n" +
+                              "• Rescheduling less than 24 hours before your slot may result in a forfeited deposit.\n\n" +
+                              "Do you want to proceed?";
+        if (!confirm(policyWarning)) return;
+    }
+
+    modal.style.display = 'flex';
+    showStep(1);
+    renderCalendar();
+
+    if (isResume && lockExpires) {
+        // Already in Rescheduling state — use existing lock
+        reschedState.lockExpiresAt = lockExpires;
+        startCountdown(new Date(lockExpires));
+    } else {
+        // Initiate reschedule via API
+        try {
+            const data = await apiFetch(`/appointment/${id}/reschedule/initiate/`, {});
+            reschedState.lockExpiresAt = data.lock_expires_at;
+            startCountdown(new Date(data.lock_expires_at));
+        } catch (err) {
+            modal.style.display = 'none';
+            alert(err.message || 'Could not start reschedule. Please try again.');
+            return;
+        }
+    }
+}
+
+document.getElementById('rescheduleModalClose').addEventListener('click', function () {
+    if (reschedState.appointmentId && !reschedState.selectedTime) {
+        // User closed without confirming — abort
+        apiFetch(`/appointment/${reschedState.appointmentId}/reschedule/abort/`, {})
+            .catch(() => {});
+    }
+    closeModal();
+});
+
+function closeModal() {
+    clearInterval(reschedState.countdownInterval);
+    reschedState.countdownInterval = null;
+    modal.style.display = 'none';
+}
+
+// Cancel on overlay click
+modal.addEventListener('click', function (e) {
+    if (e.target === modal) {
+        document.getElementById('rescheduleModalClose').click();
+    }
+});
+
+// ── Countdown timer ──────────────────────────────────────────────────────────
+function startCountdown(expiresAt) {
+    // Timer disabled per user request
+}
+
+// ── Calendar ─────────────────────────────────────────────────────────────────
+function renderCalendar() {
+    const grid = document.getElementById('reschedCalGrid');
+    const monthLabel = document.getElementById('reschedCalMonth');
+    const year = reschedState.calYear;
+    const month = reschedState.calMonth;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxDate = new Date(today);
+    maxDate.setMonth(maxDate.getMonth() + 3);
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    monthLabel.textContent = `${monthNames[month]} ${year}`;
+
+    const prevBtn = document.getElementById('reschedCalPrev');
+    const nextBtn = document.getElementById('reschedCalNext');
+    const firstOfMonth = new Date(year, month, 1);
+    prevBtn.disabled = year === today.getFullYear() && month === today.getMonth();
+    nextBtn.disabled = year === maxDate.getFullYear() && month === maxDate.getMonth();
+
+    grid.innerHTML = '';
+    // Day headers
+    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+        const h = document.createElement('div');
+        h.className = 'reschedule-cal-header';
+        h.textContent = d;
+        grid.appendChild(h);
+    });
+
+    // Blank cells before first day
+    const startDay = firstOfMonth.getDay();
+    for (let i = 0; i < startDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'reschedule-cal-day blank';
+        grid.appendChild(blank);
+    }
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cellDate = new Date(year, month, d);
+        const cell = document.createElement('div');
+        cell.className = 'reschedule-cal-day';
+        cell.textContent = d;
+        const isPast = cellDate < today;
+        const lockDate = new Date(today);
+        lockDate.setDate(lockDate.getDate() + 2);
+        const isRestricted = cellDate >= today && cellDate < lockDate;
+        const isFuture = cellDate > maxDate;
+        const isSunday = cellDate.getDay() === 0; // Sunday check (day 0)
+        
+        if (isPast || isRestricted || isFuture || isSunday) {
+            cell.classList.add('disabled');
+            if (isRestricted) {
+                // 48-hour rescheduling governance
+                cell.title = "Rescheduling within 48 hours is unavailable";
+                cell.addEventListener('click', function() {
+                    alert("Appointments cannot be rescheduled within 48 hours of the new date through the automated system to ensure artist preparation. For urgent last-minute changes, please contact the studio directly via the 'Contact Artist' button.");
+                });
+            } else if (isSunday) {
+                cell.title = "Sundays are closed - no bookings available";
+                cell.addEventListener('click', function() {
+                    alert("The studio is closed on Sundays. Please select another day.");
+                });
+            }
+        } else {
+            cell.addEventListener('click', function () {
+                grid.querySelectorAll('.reschedule-cal-day.selected').forEach(el => el.classList.remove('selected'));
+                cell.classList.add('selected');
+                const month2 = String(month + 1).padStart(2, '0');
+                const day2 = String(d).padStart(2, '0');
+                reschedState.selectedDate = `${year}-${month2}-${day2}`;
+                document.getElementById('rescheduleSelectedDate').textContent = cellDate.toLocaleDateString('en-US', { weekday: 'long', year:'numeric', month:'long', day:'numeric' });
+                showStep(2);
+                renderTimeSlots();
+            });
+        }
+        grid.appendChild(cell);
+    }
+}
+
+document.getElementById('reschedCalPrev').addEventListener('click', function () {
+    if (this.disabled) return;
+    reschedState.calMonth--;
+    if (reschedState.calMonth < 0) { reschedState.calMonth = 11; reschedState.calYear--; }
+    renderCalendar();
+});
+document.getElementById('reschedCalNext').addEventListener('click', function () {
+    if (this.disabled) return;
+    reschedState.calMonth++;
+    if (reschedState.calMonth > 11) { reschedState.calMonth = 0; reschedState.calYear++; }
+    renderCalendar();
+});
+
+document.getElementById('reschedBackToDate').addEventListener('click', function () {
+    reschedState.selectedDate = null;
+    showStep(1);
+});
+document.getElementById('reschedBackToTime').addEventListener('click', function () {
+    reschedState.selectedTime = null;
+    showStep(2);
+    renderTimeSlots();
+});
+
+// ── Time slots ───────────────────────────────────────────────────────────────
+const ALL_TIME_SLOTS = [
+    '10:00','11:00',
+    '12:00','13:00','14:00',
+    '15:00','16:00','17:00',
+    '18:00','19:00','20:00'
+];
+
+function isSlotBooked(date, time) {
+    return BOOKED_SLOTS.some(s => s.date === date && s.time === time && String(s.artist_id) === String(reschedState.artistId));
+}
+
+function renderTimeSlots() {
+    const container = document.getElementById('reschedTimeSlots');
+    container.innerHTML = '';
+    ALL_TIME_SLOTS.forEach(t => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'reschedule-time-btn';
+        btn.textContent = formatTime(t);
+        const booked = isSlotBooked(reschedState.selectedDate, t);
+        if (booked) {
+            btn.disabled = true;
+            btn.classList.add('booked');
+            btn.title = 'Already booked';
+        } else {
+            btn.addEventListener('click', async function () {
+                reschedState.selectedTime = t;
+                // Propose the slot to the server
+                try {
+                    await apiFetch(`/appointment/${reschedState.appointmentId}/reschedule/propose/`, {
+                        date: reschedState.selectedDate,
+                        time: t,
+                    });
+                } catch (err) {
+                    alert(err.message || 'That slot is no longer available.');
+                    renderTimeSlots();
+                    return;
+                }
+                const displayDate = new Date(reschedState.selectedDate + 'T00:00').toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric'});
+                document.getElementById('rescheduleConfirmDetails').textContent = `${displayDate} at ${formatTime(t)}`;
+                showStep(3);
+            });
+        }
+        container.appendChild(btn);
+    });
+}
+
+function formatTime(t) {
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+// ── Confirm ──────────────────────────────────────────────────────────────────
+document.getElementById('rescheduleConfirmBtn').addEventListener('click', async function () {
+    this.disabled = true;
+    this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Confirming…';
+    try {
+        const data = await apiFetch(`/appointment/${reschedState.appointmentId}/reschedule/confirm/`, {});
+        closeModal();
+        location.href = data.redirect || '/history/';
+    } catch (err) {
+        this.disabled = false;
+        this.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirm Reschedule';
+        alert(err.message || 'Error confirming reschedule. Please try again.');
+    }
+});
+
+// ── Fetch helper ─────────────────────────────────────────────────────────────
+function apiFetch(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify(body),
+    }).then(async res => {
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+        return json;
+    });
+}
+
+// Review Toggle JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Review toggle functionality
+    const reviewToggles = document.querySelectorAll('.review-toggle');
+    
+    reviewToggles.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+            // Don't toggle if clicking on buttons, links, or forms
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('form')) {
+                return;
+            }
+            
+            const appointmentId = this.dataset.appointmentId;
+            const reviewSection = document.getElementById('review-' + appointmentId);
+            
+            if (reviewSection) {
+                // Toggle visibility with smooth animation
+                if (reviewSection.style.display === 'none') {
+                    reviewSection.style.display = 'block';
+                    // Add smooth slide down effect
+                    reviewSection.style.maxHeight = '0';
+                    reviewSection.style.opacity = '0';
+                    reviewSection.style.overflow = 'hidden';
+                    reviewSection.style.transition = 'all 0.3s ease';
+                    
+                    setTimeout(function() {
+                        reviewSection.style.maxHeight = reviewSection.scrollHeight + 'px';
+                        reviewSection.style.opacity = '1';
+                    }, 10);
+                    
+                    setTimeout(function() {
+                        reviewSection.style.maxHeight = 'none';
+                        reviewSection.style.overflow = 'visible';
+                    }, 310);
+                } else {
+                    // Add smooth slide up effect
+                    reviewSection.style.maxHeight = reviewSection.scrollHeight + 'px';
+                    reviewSection.style.overflow = 'hidden';
+                    reviewSection.style.transition = 'all 0.3s ease';
+                    
+                    setTimeout(function() {
+                        reviewSection.style.maxHeight = '0';
+                        reviewSection.style.opacity = '0';
+                    }, 10);
+                    
+                    setTimeout(function() {
+                        reviewSection.style.display = 'none';
+                        reviewSection.style.maxHeight = 'none';
+                        reviewSection.style.overflow = 'visible';
+                    }, 310);
+                }
+            }
+        });
+    });
+});
+
+</script>
+
+<style>
+/* ── Rescheduling badge ─────────────────────────────────────── */
+.rescheduling-badge { background: #cce5ff; color: #004085; }
+
+/* ── Reschedule modal overlay ───────────────────────────────── */
+.reschedule-modal-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.55);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.reschedule-modal-box {
+    background: #fff; border-radius: 18px;
+    width: min(520px, 96vw); max-height: 92vh; overflow-y: auto;
+    box-shadow: 0 16px 48px rgba(0,0,0,.25);
+    display: flex; flex-direction: column;
+}
+.reschedule-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 24px; border-bottom: 1px solid var(--eon-white);
+    background: var(--white-choco);
+    border-radius: 18px 18px 0 0;
+}
+.reschedule-modal-header h4 { margin:0; color: var(--bistre-brown); font-weight:700; }
+.reschedule-modal-close {
+    background: none; border: none; font-size: 24px; cursor: pointer;
+    color: #888; line-height:1;
+}
+.reschedule-modal-close:hover { color: var(--red-violet); }
+
+/* ── Countdown bar ──────────────────────────────────────────── */
+.reschedule-countdown-bar {
+    background: #fff3cd; color: #856404;
+    padding: 10px 24px; font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid #ffe69c;
+}
+
+/* ── Steps ──────────────────────────────────────────────────── */
+.reschedule-step { padding: 20px 24px 24px; }
+.reschedule-label { color: var(--bistre-brown); margin-bottom: 14px; font-size: 14px; }
+
+/* ── Calendar nav ───────────────────────────────────────────── */
+.reschedule-calendar-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+.reschedule-calendar-nav button {
+    background: none; border: 1px solid var(--olive-beige); border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; color: var(--bistre-brown);
+}
+.reschedule-calendar-nav button:disabled { opacity: .35; cursor: not-allowed; }
+.reschedule-calendar-nav span { font-weight: 700; font-size: 14px; color: var(--bistre-brown); }
+
+/* ── Calendar grid ──────────────────────────────────────────── */
+.reschedule-cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;
+}
+.reschedule-cal-day {
+    padding: 7px 4px; font-size: 13px; border-radius: 6px;
+    cursor: pointer; transition: background .15s;
+}
+.reschedule-cal-day:not(.blank):not(.disabled):hover,
+.reschedule-cal-day.selected { background: var(--red-violet); color: #fff; font-weight: 600; }
+.reschedule-cal-day.disabled { color: #ccc; cursor: not-allowed; }
+.reschedule-cal-day.blank { visibility: hidden; }
+.reschedule-cal-header { font-size: 11px; font-weight: 700; color: var(--bistre-brown); text-transform: uppercase; padding: 4px 0; }
+
+/* ── Time grid ──────────────────────────────────────────────── */
+.reschedule-time-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px;
+}
+.reschedule-time-btn {
+    padding: 10px 6px; border: 1.5px solid var(--olive-beige); border-radius: 8px;
+    background: #fff; color: var(--bistre-brown); font-weight: 600; font-size: 13px; cursor: pointer;
+    transition: all .15s;
+}
+.reschedule-time-btn:not(.booked):hover { background: var(--red-violet); color: #fff; border-color: var(--red-violet); }
+.reschedule-time-btn.booked { background: var(--eon-white); color: #bbb; cursor: not-allowed; text-decoration: line-through; }
+
+/* ── Back button ────────────────────────────────────────────── */
+.reschedule-back-btn {
+    background: none; border: 1px solid var(--olive-beige); border-radius: 8px;
+    padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--bistre-brown);
+    margin-bottom: 14px;
+}
+.reschedule-back-btn:hover { background: var(--eon-white); }
+
+/* ── Confirm summary ────────────────────────────────────────── */
+.reschedule-confirm-summary {
+    display: flex; align-items: center; gap: 18px;
+    background: var(--eon-white); border-radius: 12px;
+    padding: 20px 24px; margin-bottom: 20px;
+}
+.reschedule-confirm-text p { margin: 0 0 4px; font-size: 13px; color: #666; }
+.reschedule-confirm-text strong { font-size: 16px; color: var(--bistre-brown); }
+.reschedule-confirm-actions { display: flex; gap: 10px; }
+.reschedule-confirm-btn {
+    flex: 1; padding: 12px; background: var(--red-violet); color: #fff;
+    border: none; border-radius: 10px; font-weight: 700; font-size: 14px;
+    cursor: pointer; transition: opacity .2s;
+}
+.reschedule-confirm-btn:disabled { opacity: .6; cursor: not-allowed; }
+.reschedule-confirm-btn:hover:not(:disabled) { opacity: .88; }
+</style>
+
+
+{% endblock %}

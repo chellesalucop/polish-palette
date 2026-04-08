@@ -1,0 +1,350 @@
+{% extends "booking/client_base.html" %}
+{% load static %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/clientDashboardNew.css' %}">
+<link rel="stylesheet" href="{% static 'css/booking_form.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Booking Hero Section -->
+<section class="dashboard-hero">
+    <div class="dashboard-hero-overlay">
+        <div class="dashboard-hero-content">
+            <h1 class="dashboard-title">Book Your Appointment</h1>
+            <p class="dashboard-subtitle">Follow the steps below to schedule your nail service</p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Booking Content -->
+<div class="dashboard-content">
+    <div class="container">
+        
+        <!-- Booking Steps Indicator -->
+        <div class="booking-steps">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Service</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Artist</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Date</div>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Time</div>
+            </div>
+            <div class="step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Confirm</div>
+            </div>
+        </div>
+
+        <!-- Selection Summary -->
+        <div class="selection-summary" id="selectionSummary" style="display: none;">
+            <div class="summary-card">
+                <h3 class="summary-title">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Your Selection
+                </h3>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span class="summary-label">Service:</span>
+                        <span class="summary-value" id="selectedService">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Artist:</span>
+                        <span class="summary-value" id="selectedArtist">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Price:</span>
+                        <span class="summary-value price" id="selectedPrice">₱0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Date:</span>
+                        <span class="summary-value" id="selectedDateDisplay">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Time:</span>
+                        <span class="summary-value" id="selectedTimeDisplay">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="booking-form-container">
+            <form method="POST" class="booking-form">
+                {% csrf_token %}
+                
+                <!-- Step 1: Service Selection -->
+                <div class="booking-step active" id="step-1">
+                    <h2 class="step-title">Select Your Service</h2>
+                    <div class="service-selection">
+                        <div class="service-grid">
+                            {% for service in services %}
+                            <div class="service-option">
+                                <input type="radio" name="service" id="service{{ service.id }}" value="{{ service.id }}" required>
+                                <label for="service{{ service.id }}" class="service-card">
+                                    <div class="service-image">
+                                        {% if service.image %}
+                                            <img src="{{ service.image.url }}" alt="{{ service.name }}">
+                                        {% else %}
+                                            <img src="{% static 'images/services/default-service.jpg' %}" alt="{{ service.name }}">
+                                        {% endif %}
+                                        <span class="service-price">₱{{ service.price }}</span>
+                                        {% if service.badge %}
+                                            <span class="service-badge {{ service.badge }}">{{ service.badge|title }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="service-info">
+                                        <h3>{{ service.name }}</h3>
+                                        <p>{{ service.description|truncatewords:15 }}</p>
+                                        <span class="duration">{{ service.duration }} mins</span>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Artist Selection -->
+                <div class="booking-step" id="step-2">
+                    <h2 class="step-title">Choose Your Artist</h2>
+                    <div class="artist-selection">
+                        <div class="artist-grid">
+                            {% for artist in artists %}
+                            <div class="artist-option">
+                                <input type="radio" name="artist" id="artist{{ artist.id }}" value="{{ artist.id }}" required>
+                                <label for="artist{{ artist.id }}" class="artist-card">
+                                    <div class="artist-avatar">
+                                        {% if artist.user.profile_picture %}
+                                            <img src="{{ artist.user.profile_picture.url }}" alt="{{ artist.user.get_full_name }}">
+                                        {% else %}
+                                            <img src="{% static 'images/pfp/default-avatar.png' %}" alt="{{ artist.user.get_full_name }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="artist-info">
+                                        <h3>{{ artist.user.get_full_name }}</h3>
+                                        <p class="specialty">{{ artist.status }}</p>
+                                        <div class="rating">
+                                            <i class="bi bi-star-fill"></i>
+                                            <span>5.0</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Date Selection -->
+                <div class="booking-step" id="step-3">
+                    <h2 class="step-title">Select Date</h2>
+                    <div class="date-selection">
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button type="button" class="calendar-nav prev">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <h3 class="calendar-month">March 2026</h3>
+                                <button type="button" class="calendar-nav next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="calendar-grid">
+                                <div class="calendar-weekdays">
+                                    <div>Sun</div>
+                                    <div>Mon</div>
+                                    <div>Tue</div>
+                                    <div>Wed</div>
+                                    <div>Thu</div>
+                                    <div>Fri</div>
+                                    <div>Sat</div>
+                                </div>
+                                <div class="calendar-days">
+                                    <!-- Calendar days will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="date" id="selected-date" required>
+                    </div>
+                </div>
+
+                <!-- Step 4: Time Selection -->
+                <div class="booking-step" id="step-4">
+                    <h2 class="step-title">Select Time</h2>
+                    <div class="time-selection">
+                        <div class="time-slots">
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time1" value="10:00" required>
+                                <label for="time1">10:00 AM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time2" value="11:00" required>
+                                <label for="time2">11:00 AM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time3" value="12:00" required>
+                                <label for="time3">12:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time4" value="13:00" required>
+                                <label for="time4">1:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time5" value="14:00" required>
+                                <label for="time5">2:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time6" value="15:00" required>
+                                <label for="time6">3:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time7" value="16:00" required>
+                                <label for="time7">4:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time8" value="17:00" required>
+                                <label for="time8">5:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time9" value="18:00" required>
+                                <label for="time9">6:00 PM</label>
+                            </div>
+                            <div class="time-slot">
+                                <input type="radio" name="time" id="time10" value="19:00" required>
+                                <label for="time10">7:00 PM</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Confirmation -->
+                <div class="booking-step" id="step-5">
+                    <h2 class="step-title">Payment & Confirmation</h2>
+                    
+                    <div class="payment-confirmation-grid">
+                        
+                        <div class="summary-card">
+                            <h3>Booking Details</h3>
+                            <div class="summary-item">
+                                <span class="label">Service:</span>
+                                <span class="value" id="summary-service">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Artist:</span>
+                                <span class="value" id="summary-artist">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Date:</span>
+                                <span class="value" id="summary-date">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Time:</span>
+                                <span class="value" id="summary-time">-</span>
+                            </div>
+                            <div class="summary-item total">
+                                <span class="label">Total Amount Due:</span>
+                                <span class="value" id="summary-price">-</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-card">
+                            <h3><i class="bi bi-phone"></i> GCash Payment</h3>
+                            <p class="payment-instruction">Please scan the QR code to pay the total amount due, then provide your transaction details below.</p>
+                            
+                            <div class="gcash-gateway">
+                                <div class="qr-section">
+                                    <div class="qr-frame">
+                                        <img src="{% static 'images/gcashQR.png' %}" alt="GCash QR Code">
+                                    </div>
+                                    <div class="qr-owner">
+                                        <span class="owner-name">Katherine P.</span>
+                                        <span class="owner-number">GCash Account</span>
+                                    </div>
+                                </div>
+
+                                <div class="payment-inputs">
+                                    <div class="input-group-custom">
+                                        <label for="ref-code">Reference Number *</label>
+                                        <input type="text" id="ref-code" name="reference_code" required placeholder="e.g. 1001234567890">
+                                    </div>
+                                    
+                                    <div class="input-group-custom">
+                                        <label for="receipt-upload">Upload Receipt *</label>
+                                        <input type="file" id="receipt-upload" name="payment_receipt" accept="image/*" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="payment-warning">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <p><strong>NOTICE:</strong> Please only insert the Transaction Receipt. Any unrelated image seen will need proof of soft copy from the user once inside.</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="booking-actions">
+                        <button type="submit" class="confirm-booking-btn">
+                            <i class="bi bi-check-circle"></i>
+                            Confirm Booking & Submit Payment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="booking-navigation">
+                    <button type="button" class="nav-btn prev-btn" id="prevBtn" disabled>
+                        <i class="bi bi-arrow-left"></i>
+                        Previous
+                    </button>
+                    <button type="button" class="nav-btn next-btn" id="nextBtn">
+                        Next
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.bookedSlotsData = JSON.parse('{{ booked_slots_json|escapejs }}');
+    // This script checks the URL for ?service=X and auto-selects it in the form
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceId = urlParams.get('service');
+        
+        if (serviceId) {
+            // Assumes your service dropdown has name="service"
+            const serviceSelect = document.querySelector('select[name="service"], input[name="service"][value="' + serviceId + '"]');
+            
+            if (serviceSelect) {
+                if (serviceSelect.tagName === 'SELECT') {
+                    serviceSelect.value = serviceId;
+                    // Trigger a change event just in case you have other JS relying on it
+                    serviceSelect.dispatchEvent(new Event('change'));
+                } else if (serviceSelect.type === 'radio') {
+                    serviceSelect.checked = true;
+                    serviceSelect.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    });
+</script>
+
+<script src="{% static 'js/booking_form.js' %}"></script>
+
+{% endblock %}

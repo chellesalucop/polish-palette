@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ subject }}</title>
+<style>
+  body { margin: 0; padding: 0; background-color: #F5F5F5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  .email-wrapper { max-width: 600px; margin: 0 auto; background: #FFFFFF; }
+  .email-header { background: #867B18; padding: 24px 32px; text-align: center; }
+  .email-header img { height: 48px; }
+  .email-header h1 { color: #FFFDF5; font-size: 18px; margin: 12px 0 0; font-weight: 600; letter-spacing: 1px; }
+  .email-body { padding: 32px; color: #333; line-height: 1.7; }
+  .email-body h2 { color: #867B18; font-size: 20px; margin: 0 0 16px; }
+  .email-body p { margin: 0 0 14px; font-size: 15px; }
+  .detail-card { background: #EDE6D4; border-radius: 10px; padding: 20px; margin: 20px 0; }
+  .detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+  .detail-label { color: #867B18; font-weight: 600; }
+  .detail-value { color: #333; text-align: right; }
+  .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #fff; }
+  .status-waiting { background: #B7AA7A; }
+  .status-approved { background: #28a745; }
+  .status-ongoing { background: #867B18; }
+  .status-finished { background: #6c757d; }
+  .status-cancelled { background: #8C2E3E; }
+  .cta-btn { display: inline-block; background: #8C2E3E; color: #FFFDF5 !important; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; margin: 20px 0; }
+  .cta-btn:hover { background: #6d2230; }
+  .email-footer { background: #EDE6D4; padding: 20px 32px; text-align: center; font-size: 12px; color: #867B18; }
+  .email-footer a { color: #8C2E3E; text-decoration: none; }
+  .divider { border: none; border-top: 1px solid #EDE6D4; margin: 20px 0; }
+  @media (max-width: 600px) {
+    .email-body { padding: 20px; }
+    .detail-row { flex-direction: column; gap: 2px; }
+    .detail-value { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="email-wrapper">
+  <!-- Header -->
+  <div class="email-header">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td align="center" style="padding: 20px 0;">
+          <img src="cid:polishpalattelogo" alt="Polish Palette Logo" style="height: 48px; width: auto;">
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <h1>Polish Palette</h1>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Body -->
+  <div class="email-body">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Footer -->
+  <div class="email-footer">
+    <p>&copy; 2026 Polish Palette &middot; 363 P. Casal St., Quiapo, Manila</p>
+    <p>
+      <a href="mailto:polishpalette@gmail.com">polishpalette@gmail.com</a> &middot; 09676954200
+    </p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends "emails/base_email.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Service Completed!</h2>
+<p>Hello <strong>{{ client_name }}</strong>,</p>
+<p>Your nail service with <strong>{{ artist_name }}</strong> has been <strong>completed</strong>!</p>
+
+<div class="detail-card">
+  <div class="detail-row">
+    <span class="detail-label">Service</span>
+    <span class="detail-value">{{ service_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Artist</span>
+    <span class="detail-value">{{ artist_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Completion Time</span>
+    <span class="detail-value">{{ completion_time }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Status</span>
+    <span class="detail-value">
+      <span class="status-badge status-finished">Completed</span>
+    </span>
+  </div>
+</div>
+
+<p><strong>Thank you for choosing Polish Palette!</strong></p>
+<p>We hope you love your new nails! Don't forget to share your experience and leave a review for {{ artist_name }}.</p>
+
+<p><strong>Next Steps:</strong></p>
+<ul>
+  <li>Book your next appointment through your dashboard</li>
+  <li>Share photos of your beautiful nails</li>
+  <li>Leave a review for your artist</li>
+</ul>
+
+<hr class="divider">
+
+<p style="text-align: center; font-style: italic;">Visit us again soon for your next nail pampering session!</p>
+{% endblock %}
+    </div>
+</body>
+</html>

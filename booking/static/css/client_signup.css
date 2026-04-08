@@ -1,0 +1,593 @@
+/* ===============================
+   OPTIMIZED CLIENT SIGNUP STYLES
+=================================*/
+/* CSS Variables (imported from client_base.css) */
+:root {
+    --bistre-brown: #867B18;
+    --white-choco: #EDE6D4;
+    --red-violet: #8C2E3E;
+    --eon-white: #F5F5F5;
+    --ecru-wealth: #f3f3f2;
+    --olive-beige: #B7AA7A;
+    --white-beige: #FFFDF5;
+    --black: #000000;
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--white-choco);
+    color: var(--bistre-brown);
+}
+
+/* ===============================
+   HIDE BOOTSTRAP VALIDATION ICONS
+=================================*/
+/* Remove checkmark icon from valid inputs */
+.form-control.is-valid,
+.was-validated .form-control:valid {
+    background-image: none !important;
+    padding-right: 0.75rem !important;
+}
+
+/* Remove error icon from invalid inputs */
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+    background-image: none !important;
+    padding-right: 0.75rem !important;
+}
+
+/* Keep padding for password fields with toggle icon */
+.form-control.is-valid.pe-5,
+.form-control.is-invalid.pe-5,
+.was-validated .form-control:valid.pe-5,
+.was-validated .form-control:invalid.pe-5 {
+    padding-right: 45px !important;
+}
+
+/* Main Layout Structure */
+.full-height-row {
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* LEFT SECTION - SCROLLABLE CONTENT AREA */
+.auth-left {
+    background-color: var(--white-choco);
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--red-violet) var(--white-choco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* Custom Scrollbar */
+.auth-left::-webkit-scrollbar {
+    width: 8px;
+}
+
+.auth-left::-webkit-scrollbar-track {
+    background: var(--white-choco);
+    border-radius: 4px;
+}
+
+.auth-left::-webkit-scrollbar-thumb {
+    background: var(--red-violet);
+    border-radius: 4px;
+    border: 2px solid var(--white-choco);
+}
+
+.auth-left::-webkit-scrollbar-thumb:hover {
+    background: #742534;
+}
+
+.auth-left::-webkit-scrollbar-thumb:active {
+    background: #6a2432;
+}
+
+/* Content Container */
+.signup-content {
+    max-width: 480px;
+    width: 100%;
+    padding: 2rem 1rem;
+}
+
+/* Form Container */
+.signup-form {
+    width: 100%;
+}
+
+/* Text Section */
+.text-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Title and Subtitle */
+.title-text {
+    color: var(--red-violet);
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    z-index: 10;
+}
+
+.subtitle-text {
+    color: #6E4F3A;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+    line-height: 1.4;
+    opacity: 1;
+    visibility: visible;
+    display: block;
+    position: relative;
+    z-index: 10;
+}
+
+/* Messages Section */
+.messages-section {
+    margin-bottom: 1.5rem;
+}
+
+/* Labels */
+.form-label {
+    color: var(--red-violet);
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 0.4rem;
+}
+
+/* Inputs */
+.custom-input {
+    background-color: var(--ecru-wealth);
+    border: 2px solid var(--red-violet);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    color: var(--bistre-brown);
+    width: 100%;
+}
+
+.custom-input:focus {
+    background-color: var(--ecru-wealth);
+    border: 2px solid var(--red-violet);
+    box-shadow: 0 0 0 0.2rem rgba(140, 46, 62, 0.25);
+    outline: none;
+}
+
+.custom-input::placeholder {
+    color: var(--olive-beige);
+    opacity: 1;
+    font-style: italic;
+}
+
+/* Validation States */
+.custom-input.is-valid {
+    border-color: #28a745 !important;
+}
+
+.custom-input.is-valid:focus {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+.custom-input.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.custom-input.is-invalid:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Input Group Text (for +63 prefix) */
+.input-group-text {
+    background-color: var(--ecru-wealth);
+    border: 2px solid var(--red-violet);
+    border-right: none;
+    color: var(--bistre-brown);
+    font-weight: 100;
+}
+
+/* Password input with toggle icon */
+.custom-input.pe-5 {
+    padding-right: 45px !important;
+}
+
+/* Ensure all password fields with toggle have proper spacing */
+input[type="password"].pe-5,
+input[type="text"].pe-5 {
+    padding-right: 45px !important;
+}
+
+/* Form Spacing */
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+/* Password Requirements */
+.password-requirements {
+    background-color: rgba(134, 123, 24, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+.password-requirements li {
+    margin-bottom: 2px;
+    transition: all 0.3s ease;
+}
+
+.password-requirements li.text-success {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.password-requirements li.text-danger {
+    color: #dc3545;
+}
+
+.password-requirements li.text-success::before {
+    content: "";
+    margin-right: 4px;
+}
+
+.password-requirements li.text-danger::before {
+    content: "";
+    margin-right: 4px;
+}
+
+/* Password Toggle Container */
+.password-field {
+    position: relative !important;
+    display: block;
+    width: 100%;
+}
+
+/* Password Toggle Icon */
+.password-field .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--bistre-brown);
+    transition: all 0.3s ease;
+    z-index: 100;
+    pointer-events: auto;
+    user-select: none;
+    line-height: 1;
+    background: none;
+    border: none;
+    padding: 4px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-field .toggle-password:hover {
+    transform: translateY(-50%) scale(1.1);
+    color: var(--red-violet);
+}
+
+.password-field .toggle-password:focus {
+    outline: 2px solid var(--red-violet);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Ensure checkbox has proper spacing */
+.form-check {
+    margin-bottom: 1.5rem !important;
+    margin-top: 0.5rem !important;
+    clear: both;
+}
+
+/* Ensure toggle icon stays in place */
+.password-field .custom-input.pe-5 + .toggle-password {
+    position: absolute !important;
+    top: 50% !important;
+    right: 12px !important;
+    transform: translateY(-50%) !important;
+}
+
+/* Checkbox */
+.form-check {
+    margin-bottom: 1.5rem !important;
+}
+
+.form-check-input {
+    border: 2px solid var(--red-violet);
+    border-radius: 4px;
+    width: 18px;
+    height: 18px;
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked {
+    background-color: var(--red-violet);
+    border-color: var(--red-violet);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(140, 46, 62, 0.25);
+    border-color: var(--red-violet);
+    outline: none;
+}
+
+.form-check-label {
+    color: var(--bistre-brown) !important;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+/* Prevent checkbox label from turning red when checkbox is invalid */
+.form-check-label {
+    color: var(--bistre-brown) !important;
+}
+
+/* Buttons */
+.primary-btn {
+    background-color: var(--red-violet);
+    color: var(--eon-white);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+}
+
+.primary-btn:hover {
+    background-color: #742534;
+    color: var(--eon-white);
+    box-shadow: 0 4px 12px rgba(140, 46, 62, 0.3);
+}
+
+.primary-btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(140, 46, 62, 0.5);
+    outline: none;
+}
+
+/* Google OAuth Button */
+.btn-outline-secondary {
+    background-color: transparent;
+    border: 2px solid var(--bistre-brown);
+    color: var(--bistre-brown);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--bistre-brown);
+    color: var(--eon-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(134, 123, 24, 0.3);
+}
+
+.btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(134, 123, 24, 0.5);
+    outline: none;
+}
+
+.btn-outline-secondary svg {
+    transition: transform 0.3s ease;
+}
+
+.btn-outline-secondary:hover svg {
+    transform: scale(1.1);
+}
+
+/* Divider */
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--red-violet), transparent);
+    z-index: 0;
+}
+
+.divider span {
+    position: relative;
+    background-color: var(--white-choco);
+    padding: 0 20px;
+    color: var(--bistre-brown);
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1;
+}
+
+/* Account Section */
+.account-section {
+    margin-top: 1.5rem;
+}
+
+.account-text {
+    color: var(--bistre-brown);
+    font-size: 14px;
+    margin: 0;
+}
+
+.account-link {
+    color: var(--red-violet);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-left: 8px;
+}
+
+.account-link:hover {
+    text-decoration: underline;
+    color: #742534;
+}
+
+/* Alert Messages */
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 10px 14px;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+/* RIGHT SECTION - FIXED IMAGE */
+.auth-right {
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--white-beige);
+    position: relative;
+}
+
+.signup-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 991.98px) {
+    .auth-left {
+        padding: 35px 0;
+    }
+    
+    .signup-content {
+        padding: 18px 1.5rem 28px 1.5rem;
+    }
+    
+    .title-text {
+        font-size: 1.6rem;
+    }
+    
+    .subtitle-text {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .auth-left {
+        padding: 30px 0;
+    }
+    
+    .signup-content {
+        padding: 15px 1rem 25px 1rem;
+    }
+    
+    .title-text {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle-text {
+        font-size: 0.85rem;
+    }
+    
+    .custom-input {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .form-label {
+        font-size: 13px;
+    }
+    
+    .password-requirements {
+        font-size: 10px;
+        padding: 6px;
+    }
+    
+    /* Mobile: Hide image section completely to give more space to form */
+    .auth-right {
+        display: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .auth-left {
+        padding: 25px 0;
+    }
+    
+    .signup-content {
+        padding: 12px 0.5rem 20px 0.5rem;
+    }
+    
+    .title-text {
+        font-size: 1.4rem;
+    }
+    
+    .subtitle-text {
+        font-size: 0.8rem;
+    }
+    
+    .custom-input {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+    
+    .primary-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-left {
+        padding: 20px 0;
+    }
+    
+    .signup-content {
+        padding: 10px 0.25rem 15px 0.25rem;
+    }
+    
+    .title-text {
+        font-size: 1.3rem;
+    }
+    
+    .subtitle-text {
+        font-size: 0.75rem;
+    }
+}

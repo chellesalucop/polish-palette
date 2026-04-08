@@ -1,0 +1,45 @@
+{% extends "booking/client_base.html" %}
+{% load static %}
+
+{% block title %}{% if mode == 'edit' %}Edit Review{% else %}Rate Appointment{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/client_review_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="review-form-page">
+    <div class="container">
+        <div class="review-form-card">
+            <div class="review-form-header">
+                <h2>{% if mode == 'edit' %}Edit Your Review{% else %}Rate Your Appointment{% endif %}</h2>
+                <p>{{ appointment.service.name }} • {{ appointment.artist.user.get_full_name }} • {{ appointment.date|date:"M d, Y" }}</p>
+            </div>
+
+            <form method="POST" class="review-form">
+                {% csrf_token %}
+
+                <label class="form-label">Rating (1-5) *</label>
+                <div class="rating-group">
+                    {% for value in "12345" %}
+                        <label class="rating-option">
+                            <input type="radio" name="rating" value="{{ value }}"
+                                {% if review and review.rating|stringformat:"s" == value %}checked{% endif %}
+                                {% if not review and value == "5" %}checked{% endif %}>
+                            <span>{{ value }} <i class="bi bi-star-fill"></i></span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <label for="comment" class="form-label">Comment (optional, max 500)</label>
+                <textarea id="comment" name="comment" maxlength="500" rows="4" placeholder="Share your experience...">{% if review %}{{ review.comment }}{% endif %}</textarea>
+
+                <div class="review-form-actions">
+                    <a href="{% url 'client_history' %}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">{% if mode == 'edit' %}Save Changes{% else %}Submit Review{% endif %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

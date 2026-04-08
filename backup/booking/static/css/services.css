@@ -1,0 +1,411 @@
+/* Services Categories Styles */
+.services-categories {
+    margin-bottom: 50px;
+}
+
+.category-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    background: white;
+    padding: 15px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 25px;
+    background: transparent;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.category-tab:hover {
+    background: var(--ecru-wealth);
+    color: var(--red-violet);
+}
+
+.category-tab.active {
+    background: linear-gradient(135deg, var(--bistre-brown), var(--red-violet));
+    color: white;
+    box-shadow: 0 4px 10px rgba(140, 46, 62, 0.2);
+}
+
+/* Services Grid Styles */
+.services-section {
+    margin-bottom: 60px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+/* Tiered Card Styling */
+.service-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    border: 2px solid var(--eon-white);
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.10);
+}
+
+/* The "Middle" Tier Highlight */
+.popular-tier {
+    border: 2px solid var(--red-violet);
+}
+
+/* The "Best" Tier Highlight */
+.premium-tier {
+    border: 2px solid var(--bistre-brown);
+    box-shadow: 0 8px 25px rgba(134, 123, 24, 0.15);
+}
+
+.service-image {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+}
+
+.service-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.service-card:hover .service-image img {
+    transform: scale(1.05);
+}
+
+.service-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.service-price {
+    background: var(--red-violet);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    align-self: flex-start;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Brand-Aligned Badges */
+.service-badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    align-self: flex-end;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.service-badge.popular {
+    background: var(--red-violet);
+    color: white;
+}
+
+.service-badge.premium {
+    background: var(--bistre-brown);
+    color: white;
+}
+
+.service-badge.trending {
+    background: var(--olive-beige);
+    color: white;
+}
+
+.service-badge.classic {
+    background: var(--eon-white);
+    color: var(--bistre-brown);
+}
+
+.service-info {
+    padding: 25px;
+    flex-grow: 1;
+}
+
+.service-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--bistre-brown);
+    margin-bottom: 12px;
+}
+
+.service-description {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.service-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: var(--red-violet);
+    font-weight: 600;
+}
+
+.service-duration,
+.service-category-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.service-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.feature {
+    background: var(--ecru-wealth);
+    color: var(--bistre-brown);
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.service-action {
+    padding: 0 25px 25px;
+    display: flex;
+}
+
+.service-select-btn {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    color: var(--red-violet);
+    border: 2px solid var(--red-violet);
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.service-select-btn:hover {
+    background: var(--red-violet);
+    color: white;
+}
+
+/* Highlighted Action Buttons for Top Tiers */
+.popular-tier .service-select-btn,
+.premium-tier .service-select-btn {
+    background: var(--red-violet);
+    color: white;
+}
+
+.popular-tier .service-select-btn:hover,
+.premium-tier .service-select-btn:hover {
+    background: #7a2a3e;
+    transform: translateY(-2px);
+}
+
+/* Service Details Modal Styles */
+.modal-content {
+    border-radius: 20px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--bistre-brown), var(--red-violet));
+    color: white;
+    border-bottom: none;
+    padding: 20px 25px;
+}
+
+.modal-title {
+    color: white;
+    font-weight: 700;
+    margin: 0;
+}
+
+.btn-close-white {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 30px 25px;
+    background: white;
+}
+
+.modal-footer {
+    background: var(--white-beige);
+    border-top: 1px solid var(--eon-white);
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--bistre-brown);
+    border: 2px solid var(--bistre-brown);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--bistre-brown);
+    color: white;
+}
+
+.btn-primary {
+    background: var(--red-violet);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #7a2a3e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(140, 46, 62, 0.3);
+}
+
+.service-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--eon-white);
+    padding-bottom: 15px;
+}
+
+.service-detail-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--bistre-brown);
+    margin: 0;
+}
+
+.service-detail-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--red-violet);
+}
+
+.service-detail-description {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.service-detail-meta {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.detail-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--bistre-brown);
+    font-weight: 700;
+}
+
+.service-detail-features h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bistre-brown);
+    margin-bottom: 10px;
+}
+
+.service-detail-features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.service-detail-features li {
+    padding: 8px 0;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.service-detail-features li:before {
+    content: "\F26A"; /* Bootstrap Icons check-circle-fill */
+    font-family: "bootstrap-icons";
+    color: var(--red-violet);
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .category-tabs {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .category-tab {
+        justify-content: center;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+}

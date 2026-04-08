@@ -1,0 +1,679 @@
+/* =========================
+   CLIENT PROFILE STYLES
+   ========================= */
+
+/* Profile Hero Section */
+.profile-hero {
+    height: 40vh;
+    width: 100%;
+    position: relative;
+    background: url("../images/land1.jpg") no-repeat center center;
+    background-size: cover;
+    margin-top: 100px;
+}
+
+.profile-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-hero-content {
+    text-align: center;
+    color: var(--white-choco);
+}
+
+.profile-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.5);
+}
+
+.profile-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* Profile Content */
+.profile-content {
+    background: var(--white-beige);
+    padding: 20px 0;
+    min-height: calc(100vh - 140px);
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Profile Cards */
+.profile-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: var(--red-violet);
+    padding: 20px;
+    text-align: center;
+}
+
+.card-title {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.card-title i {
+    font-size: 1.4rem;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+/* Profile Picture Card */
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.current-picture {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--red-violet);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.current-picture:hover {
+    transform: scale(1.05);
+}
+
+.profile-img-large {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.picture-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.current-picture:hover .picture-overlay {
+    opacity: 1;
+}
+
+.upload-form {
+    width: 100%;
+}
+
+.upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.file-input {
+    display: none;
+}
+
+.upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: var(--bistre-brown);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+    background: #6f6614;
+    transform: scale(1.02);
+}
+
+.upload-hint {
+    color: #666;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* Personal Information Form */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--bistre-brown);
+    font-size: 0.95rem;
+}
+
+.form-input {
+    padding: 12px 16px;
+    border: 2px solid var(--eon-white);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--eon-white);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--red-violet);
+    box-shadow: 0 0 0 3px rgba(140, 46, 62, 0.1);
+}
+
+/* Password Form */
+.password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.password-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-group .form-input {
+    padding-right: 50px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--bistre-brown);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.password-toggle:hover {
+    background: var(--eon-white);
+}
+
+.form-hint {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.btn-primary {
+    background: var(--bistre-brown);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    background: #6f6614;
+    transform: scale(1.02);
+}
+
+.btn-secondary {
+    background: var(--eon-white);
+    color: var(--bistre-brown);
+    border: 2px solid var(--bistre-brown);
+    padding: 12px 24px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary:hover {
+    background: var(--bistre-brown);
+    color: white;
+    transform: scale(1.02);
+}
+
+.btn-danger {
+    background: var(--red-violet);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-danger:hover {
+    background: #7a2a3e;
+    transform: scale(1.02);
+}
+
+/* Profile Alerts */
+.profile-alert {
+    margin-bottom: 30px;
+    border-radius: 15px;
+    border: none;
+}
+
+.profile-alert.alert-success {
+    background: var(--olive-beige);
+    color: var(--bistre-brown);
+}
+
+.profile-alert.alert-error {
+    background: var(--red-violet);
+    color: white;
+}
+
+/* Account Info Footer */
+.account-info-footer {
+    background: var(--white-choco);
+    padding: 40px 0;
+    margin-top: 40px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.account-details h4,
+.danger-zone h4 {
+    color: var(--bistre-brown);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.account-details p {
+    color: #666;
+    margin: 10px 0;
+    font-size: 0.95rem;
+}
+
+.status-active {
+    color: var(--olive-beige);
+    font-weight: 600;
+}
+
+.danger-zone {
+    border-left: 4px solid var(--red-violet);
+    padding-left: 20px;
+}
+
+.warning-text {
+    color: var(--red-violet);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* Delete Account Modal */
+.delete-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.delete-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-modal {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.delete-modal-overlay.show .delete-modal {
+    transform: scale(1);
+}
+
+.delete-modal-header {
+    background: var(--red-violet);
+    color: white;
+    padding: 25px;
+    text-align: center;
+}
+
+.delete-modal-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.delete-modal-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.delete-modal-body {
+    padding: 25px;
+}
+
+.delete-modal-body p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.delete-modal-body label {
+    display: block;
+    font-weight: 600;
+    color: var(--bistre-brown);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.delete-password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.delete-password-field input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 2px solid var(--olive-beige);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+}
+
+.delete-password-field input:focus {
+    outline: none;
+    border-color: var(--red-violet);
+}
+
+.toggle-pass-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.delete-modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 0 25px 25px;
+    justify-content: flex-end;
+}
+
+.btn-cancel {
+    padding: 10px 24px;
+    border: 2px solid var(--olive-beige);
+    background: white;
+    color: var(--bistre-brown);
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: var(--eon-white);
+}
+
+.btn-confirm-delete {
+    padding: 10px 24px;
+    background: var(--red-violet);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-confirm-delete:hover {
+    background: #7a2a3e;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .profile-hero {
+        height: 35vh;
+        margin-top: 80px;
+    }
+
+    .profile-title {
+        font-size: 2rem;
+    }
+
+    .profile-subtitle {
+        font-size: 1rem;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-hero {
+        height: 30vh;
+        margin-top: 70px;
+    }
+
+    .profile-title {
+        font-size: 1.8rem;
+    }
+
+    .profile-content {
+        padding: 30px 0;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .current-picture {
+        width: 150px;
+        height: 150px;
+    }
+
+    .upload-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .form-input {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .profile-content {
+        padding: 20px 0;
+    }
+
+    .profile-grid {
+        padding: 0 10px;
+        gap: 15px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .current-picture {
+        width: 120px;
+        height: 120px;
+    }
+
+    .form-input {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.profile-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.profile-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* File input styling */
+.upload-btn:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Focus states */
+.form-input:valid {
+    border-color: var(--olive-beige);
+}
+
+.form-input:invalid {
+    border-color: var(--red-violet);
+}

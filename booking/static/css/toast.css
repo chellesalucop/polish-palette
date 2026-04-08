@@ -1,0 +1,97 @@
+/* ===== POLISH PALETTE – TOAST NOTIFICATIONS ===== */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.pp-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: #FFFDF5;
+    border-left: 4px solid #B7AA7A;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.pp-toast-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.pp-toast-body {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.pp-toast-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+    padding: 0 0 0 8px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.pp-toast-close:hover {
+    color: #333;
+}
+
+/* --- Success (green accent) --- */
+.pp-toast-success {
+    border-left-color: #28a745;
+}
+.pp-toast-success .pp-toast-icon {
+    color: #28a745;
+}
+
+/* --- Info (brand olive-beige accent) --- */
+.pp-toast-info {
+    border-left-color: #867B18;
+}
+.pp-toast-info .pp-toast-icon {
+    color: #867B18;
+}
+
+/* --- Warning (amber accent) --- */
+.pp-toast-warning {
+    border-left-color: #ffc107;
+}
+.pp-toast-warning .pp-toast-icon {
+    color: #b58900;
+}
+
+/* --- Error / Danger (red-violet accent) --- */
+.pp-toast-error,
+.pp-toast-danger {
+    border-left-color: #8C2E3E;
+}
+.pp-toast-error .pp-toast-icon,
+.pp-toast-danger .pp-toast-icon {
+    color: #8C2E3E;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+    .toast-container {
+        right: 12px;
+        left: 12px;
+        max-width: unset;
+    }
+}

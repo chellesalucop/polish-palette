@@ -1,0 +1,120 @@
+{% extends "booking/client_base.html" %}
+{% load static %}
+
+{% block title %}Services{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/services.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-content">
+    <div class="container">
+        
+        <section class="services-categories">
+            <h2 class="section-title">Service Categories</h2>
+            <div class="category-tabs">
+                <button class="category-tab {% if selected_category == 'all' %}active{% endif %}" data-category="all">
+                    <i class="bi bi-grid"></i>
+                    All Services
+                </button>
+                <button class="category-tab {% if selected_category == 'gel_polish' %}active{% endif %}" data-category="gel_polish">
+                    <i class="bi bi-palette2"></i>
+                    Gel Polish
+                </button>
+                <button class="category-tab {% if selected_category == 'extensions' %}active{% endif %}" data-category="extensions">
+                    <i class="bi bi-stars"></i>
+                    Extensions
+                </button>
+                <button class="category-tab {% if selected_category == 'soft_gel_extensions' %}active{% endif %}" data-category="soft_gel_extensions">
+                    <i class="bi bi-droplet"></i>
+                    Soft Gel Extensions
+                </button>
+                <button class="category-tab {% if selected_category == 'removal' %}active{% endif %}" data-category="removal">
+                    <i class="bi bi-trash"></i>
+                    Removal
+                </button>
+            </div>
+        </section>
+
+        <section class="services-section">
+            <div class="services-grid" id="services-grid">
+                {% for service in services %}
+                <div class="service-card {% if service.badge %}{{ service.badge }}-tier{% endif %}" data-category="{{ service.category }}">
+                    <div class="service-image">
+                        {% if service.image %}
+                            <img src="{{ service.image.url }}" alt="{{ service.name }}">
+                        {% else %}
+                            {% if service.category == 'gel_polish' %}
+                                <img src="{% static 'images/services/cardGelpolish.jpg' %}" alt="{{ service.name }}">
+                            {% elif service.category == 'extensions' or service.category == 'soft_gel_extensions' %}
+                                <img src="{% static 'images/services/cardExtension.jpg' %}" alt="{{ service.name }}">
+                            {% elif service.category == 'removal' %}
+                                <img src="{% static 'images/services/cardRemoval.jpg' %}" alt="{{ service.name }}">
+                            {% else %}
+                                <img src="{% static 'images/services/default-service.jpg' %}" alt="{{ service.name }}">
+                            {% endif %}
+                        {% endif %}
+                        <div class="service-overlay">
+                            <span class="service-price">₱{{ service.price }}</span>
+                            {% if service.badge %}
+                                <span class="service-badge {{ service.badge }}">{{ service.badge|title }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="service-info">
+                        <h3 class="service-name">{{ service.name }}</h3>
+                        <p class="service-description">{{ service.description }}</p>
+                        <div class="service-meta">
+                            <span class="service-duration">
+                                <i class="bi bi-clock"></i>
+                                {{ service.duration }} mins
+                            </span>
+                            <span class="service-category-tag">
+                                <i class="bi bi-tag"></i>
+                                {{ service.get_category_display }}
+                            </span>
+                        </div>
+                        <div class="service-features">
+                            {% for feature in service.features %}
+                                <span class="feature">{{ feature }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category tabs functionality
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Filter services and update URL
+            const category = this.dataset.category;
+            const url = new URL(window.location);
+            if (category === 'all') {
+                url.searchParams.delete('category');
+            } else {
+                url.searchParams.set('category', category);
+            }
+            window.location.href = url.toString();
+        });
+    });
+});
+</script>
+
+{% endblock %}

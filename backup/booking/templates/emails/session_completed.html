@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Completed - PolishPalette</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--red-violet);
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 5px;
+        }
+        .completion-info {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .info-value {
+            color: #2d3436;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .rating-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+            text-align: center;
+        }
+        .rating-stars {
+            font-size: 24px;
+            color: #ffc107;
+            margin: 10px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: var(--red-violet);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .celebration {
+            font-size: 48px;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PolishPalette</div>
+            <h1 class="title">Your Session is Complete! 💅</h1>
+        </div>
+
+        <div class="completion-info">
+            <p>Hi <strong>{{ client_name }}</strong>,</p>
+            
+            <p>Amazing news! Your session with <strong>{{ artist_name }}</strong> has been completed successfully. Your nails should look absolutely gorgeous! ✨</p>
+            
+            <div class="info-row">
+                <span class="info-label">Service:</span>
+                <span class="info-value">{{ service_name }}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Completed At:</span>
+                <span class="info-value">{{ end_time }}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="status-badge">Completed Successfully</span>
+            </div>
+        </div>
+
+        <div class="celebration">🎉</div>
+
+        <div class="rating-section">
+            <h3 style="color: #856404; margin-bottom: 10px;">How did we do?</h3>
+            <p style="color: #856404; margin-bottom: 15px;">Your feedback helps us provide better service!</p>
+            
+            <div class="rating-stars">
+                ⭐⭐⭐⭐⭐
+            </div>
+            
+            <p style="margin-top: 20px;">
+                <a href="{{ rating_url }}" class="cta-button">Leave a Review</a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Session Summary:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>✅ Service completed by {{ artist_name }}</li>
+                <li>✅ Professional nail care provided</li>
+                <li>✅ Quality results guaranteed</li>
+                <li>✅ Sanitation and cleaning completed</li>
+            </ul>
+            
+            <p style="margin-top: 20px;">
+                <strong>Thank you for choosing PolishPalette!</strong><br>
+                <small>We hope you love your new nails! 💖</small>
+            </p>
+            
+            <p style="margin-top: 15px;">
+                <small>Book your next appointment to maintain your beautiful nails!</small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

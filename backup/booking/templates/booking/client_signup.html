@@ -1,0 +1,469 @@
+{% load socialaccount %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Client Signup{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/client_signup.css' %}">
+    {% endblock %}
+</head>
+
+<body>
+
+    {% block content %}
+    <div class="container-fluid p-0">
+        <div class="row full-height-row g-0">
+
+            <!-- LEFT - SCROLLABLE CONTENT AREA -->
+            <div class="col-md-4 d-flex align-items-start justify-content-center auth-left">
+                <div class="w-75 signup-content">
+
+                    <!-- Title Section -->
+                    <div class="text-section mb-4">
+                        <h3 class="fw-bold title-text">Get Started Now</h3>
+                        <p class="subtitle-text">Create your account to continue</p>
+                    </div>
+
+                    <form method="POST" action="{% url 'signup' %}" class="signup-form" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Messages -->
+                        {% if messages %}
+                        <div class="messages-section mb-3">
+                            {% for message in messages %}
+                            <div class="alert alert-danger">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Name Fields -->
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control custom-input"
+                                placeholder="Enter your first name..." value="{{ form_data.first_name|default:'' }}"
+                                autocomplete="given-name" inputmode="text" required minlength="2" maxlength="50"
+                                pattern="^[a-zA-Z\s]+$" title="Names should only contain letters and spaces.">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control custom-input"
+                                placeholder="Enter your last name..." value="{{ form_data.last_name|default:'' }}"
+                                autocomplete="family-name" inputmode="text" required minlength="2" maxlength="50"
+                                pattern="^[a-zA-Z\s]+$" title="Names should only contain letters and spaces.">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" id="contact_number" name="contact_number"
+                                class="form-control custom-input" placeholder="917 123 4567"
+                                value="{{ form_data.contact_number|default:'' }}" autocomplete="tel" inputmode="numeric"
+                                required maxlength="10" pattern="[0-9]{10}"
+                                title="Enter your mobile number (e.g., 9171234567)">
+                            <div id="phone-error-text" class="form-text" style="color: #dc3545; display: none;">Please
+                                start after +63 or 0</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control custom-input"
+                                placeholder="Enter your username..." value="{{ form_data.username|default:'' }}"
+                                autocomplete="username" required minlength="3" maxlength="15" pattern="^[a-zA-Z0-9._]+$"
+                                title="Username can only contain letters, numbers, dots, and underscores (3-15 characters)">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email address</label>
+                            <input type="email" name="email" class="form-control custom-input"
+                                style="text-transform: lowercase;" placeholder="your.email@example.com"
+                                value="{{ form_data.email|default:''|lower }}" autocomplete="email" required
+                                maxlength="254" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                title="Please enter a valid email address (e.g., user@domain.com)">
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label mb-1">Password</label>
+                            </div>
+                            <div class="password-field">
+                                <input type="password" id="password" name="password"
+                                    class="form-control custom-input pe-5" placeholder="********"
+                                    autocomplete="new-password" required minlength="10" maxlength="128">
+                            </div>
+                            <!-- Password Requirements Checklist -->
+                            <div id="password-requirements" class="password-requirements mt-2" style="display: none;">
+                                <p class="mb-1 small text-muted fw-bold">Password must contain:</p>
+                                <ul class="list-unstyled mb-0 small">
+                                    <li id="req-length" class="text-muted mb-1">
+                                        <i class="bi bi-circle me-1"></i> At least 10 characters
+                                    </li>
+                                    <li id="req-upper" class="text-muted mb-1">
+                                        <i class="bi bi-circle me-1"></i> One uppercase letter
+                                    </li>
+                                    <li id="req-number" class="text-muted mb-1">
+                                        <i class="bi bi-circle me-1"></i> One number
+                                    </li>
+                                    <li id="req-special" class="text-muted mb-1">
+                                        <i class="bi bi-circle me-1"></i> One special character
+                                    </li>
+                                    <li id="req-unique" class="text-muted">
+                                        <i class="bi bi-circle me-1"></i> No common patterns or personal info
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <div class="password-field">
+                                <input type="password" name="confirm_password" id="confirm_password"
+                                    class="form-control custom-input pe-5" placeholder="Re-enter password"
+                                    autocomplete="new-password" required minlength="10" maxlength="128">
+
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" required>
+                            <label class="form-check-label">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal"
+                                    style="color: var(--bistre-brown);">Terms & Policy</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn w-100 primary-btn mb-4 btn-secondary">
+                            Sign Up
+                        </button>
+
+                        <!-- Divider -->
+                        <div class="divider mb-4">
+                            <span>OR</span>
+                        </div>
+
+                        <!-- Google OAuth -->
+                        <div class="mb-4">
+                            <a href="{% provider_login_url 'google' process='signup' %}"
+                                class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center google-oauth-btn"
+                                id="googleSignupBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" class="me-2 google-icon">
+                                    <path fill="#4285F4"
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                    <path fill="#34A853"
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                    <path fill="#FBBC05"
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                    <path fill="#EA4335"
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                </svg>
+                                <span class="google-btn-text">Sign up with Google</span>
+                                <div class="spinner-border spinner-border-sm ms-2 google-spinner"
+                                    style="display: none;"></div>
+                            </a>
+                        </div>
+
+                        <!-- Account Link -->
+                        <div class="text-center account-section">
+                            <p class="account-text">
+                                Have an account?
+                                <a href="{% url 'login' %}" class="account-link">Log In</a>
+                            </p>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-md-8 d-none d-md-block auth-right">
+                <img src="{% static 'images/register.jpg' %}" alt="Signup Image" class="signup-image">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Terms & Policy Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms & Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Terms of Service</h6>
+                    <p>By using our nail booking service, you agree to the following terms:</p>
+                    <ul>
+                        <li>You must be at least 18 years old to use our services</li>
+                        <li>All bookings must be made at least 24 hours in advance</li>
+                        <li>Cancellations made less than 12 hours before appointment may be subject to a fee</li>
+                        <li>Payment is required at the time of booking</li>
+                        <li>We reserve the right to refuse service to anyone</li>
+                    </ul>
+
+                    <h6>Privacy Policy</h6>
+                    <p>We are committed to protecting your privacy and personal information:</p>
+                    <ul>
+                        <li>We collect only necessary information for booking purposes</li>
+                        <li>Your personal information is never shared with third parties</li>
+                        <li>Payment information is encrypted and securely processed</li>
+                        <li>You have the right to request deletion of your personal data</li>
+                        <li>We use cookies to improve your experience on our platform</li>
+                    </ul>
+
+                    <h6>Service Agreement</h6>
+                    <p>By agreeing to these terms, you acknowledge that:</p>
+                    <ul>
+                        <li>All information provided is accurate and truthful</li>
+                        <li>You will arrive on time for your scheduled appointments</li>
+                        <li>You will respect our staff and property</li>
+                        <li>Service quality concerns should be reported within 24 hours</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
+
+    {% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/auth_password_toggle.js' %}"></script>
+    <script src="{% static 'js/mobile_flexible_validation.js' %}"></script>
+    <script src="{% static 'js/email_validation.js' %}"></script>
+    <script src="{% static 'js/username_validation.js' %}"></script>
+    <script src="{% static 'js/password_validation.js' %}"></script>
+    <script src="{% static 'js/name_validation.js' %}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.signup-form');
+            const phoneInput = document.getElementById('contact_number');
+            const customSubmitErrorId = 'signup-validation-error';
+
+            function getFieldLabel(input) {
+                if (input.type === 'checkbox') {
+                    const checkboxLabel = input.closest('.form-check')?.querySelector('.form-check-label');
+                    return checkboxLabel ? checkboxLabel.textContent.trim() : 'This field';
+                }
+
+                const fieldLabel = input.closest('.mb-3')?.querySelector('.form-label');
+                if (fieldLabel) {
+                    return fieldLabel.textContent.trim();
+                }
+
+                return input.name ? input.name.replace(/_/g, ' ') : 'This field';
+            }
+
+            function clearRequiredSubmitErrors() {
+                form.querySelectorAll('.submit-required-feedback').forEach((node) => node.remove());
+                form.querySelectorAll('.submit-required-invalid').forEach((input) => {
+                    input.classList.remove('submit-required-invalid');
+                    input.classList.remove('is-invalid');
+                });
+            }
+
+            function removeRequiredErrorForField(input) {
+                const fieldContainer = input.closest('.form-check') || input.closest('.mb-3') || input.parentNode;
+                const existing = fieldContainer.querySelector('.submit-required-feedback');
+                if (existing) {
+                    existing.remove();
+                }
+
+                // Only remove is-invalid if it was set by our submit handler,
+                // so we don't accidentally hide errors from field-specific validators.
+                if (!input.classList.contains('submit-required-invalid')) {
+                    return;
+                }
+
+                input.classList.remove('submit-required-invalid');
+
+                if (input.type === 'checkbox') {
+                    if (input.checked) {
+                        input.classList.remove('is-invalid');
+                    }
+                    return;
+                }
+
+                input.classList.remove('is-invalid');
+            }
+
+            function showRequiredErrorForField(input) {
+                removeRequiredErrorForField(input);
+
+                // Check if field already has a validation error (avoid duplicates)
+                const existingError = input.parentNode.querySelector('.invalid-feedback:not(.submit-required-feedback)');
+                const phoneError = document.getElementById('phone-validation-feedback');
+
+                // For password fields, check the .mb-3 container where errors are actually placed
+                const validationContainer = input.closest('.mb-3') || input.parentNode;
+                const passwordError = validationContainer.querySelector('.password-feedback');
+                const confirmPasswordError = validationContainer.querySelector('.confirm-password-feedback');
+
+                if (existingError || (phoneError && input.parentNode.contains(phoneError)) ||
+                    passwordError || confirmPasswordError) {
+                    // Field already has an error, don't add another one
+                    return;
+                }
+
+                // Don't add any classes or interfere with field validation - just show the error text
+                const feedback = document.createElement('div');
+                feedback.className = 'submit-required-feedback invalid-feedback';
+                feedback.style.display = 'block';
+                feedback.textContent = `${getFieldLabel(input)} is required`;
+
+                if (input.type === 'checkbox') {
+                    const formCheck = input.closest('.form-check');
+                    feedback.style.display = 'block';
+                    feedback.style.marginTop = '0.25rem';
+                    feedback.style.marginLeft = '-1.5em';
+                    feedback.style.fontSize = '0.875rem';
+                    feedback.style.color = '#dc3545';
+                    formCheck.appendChild(feedback);
+                    return;
+                }
+
+                const passwordField = input.closest('.password-field');
+                if (passwordField) {
+                    passwordField.insertAdjacentElement('afterend', feedback);
+                } else {
+                    input.insertAdjacentElement('afterend', feedback);
+                }
+            }
+
+            function clearCustomSubmitError() {
+                const existingError = document.getElementById(customSubmitErrorId);
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            function showCustomSubmitError() {
+                clearCustomSubmitError();
+
+                const error = document.createElement('div');
+                error.id = customSubmitErrorId;
+                error.className = 'alert alert-danger';
+                error.textContent = 'Please fill out all the inputs until they are all valid.';
+
+                form.insertBefore(error, form.firstElementChild);
+            }
+
+            if (form) {
+                const requiredFields = form.querySelectorAll('[required]');
+
+                requiredFields.forEach((input) => {
+                    if (input.type === 'checkbox') {
+                        input.addEventListener('change', function () {
+                            removeRequiredErrorForField(input);
+                        });
+                        return;
+                    }
+
+                    // While user is inside a field, prioritize the field's own validation feedback.
+                    input.addEventListener('focus', function () {
+                        removeRequiredErrorForField(input);
+                    });
+
+                    input.addEventListener('input', function () {
+                        removeRequiredErrorForField(input);
+                    });
+                });
+
+                form.addEventListener('submit', function (e) {
+                    clearCustomSubmitError();
+                    clearRequiredSubmitErrors();
+
+                    let hasEmptyRequired = false;
+                    let firstInvalid = null;
+
+                    requiredFields.forEach((input) => {
+                        const isEmpty = input.type === 'checkbox' ? !input.checked : input.value.trim() === '';
+                        if (!isEmpty) {
+                            return;
+                        }
+
+                        hasEmptyRequired = true;
+                        showRequiredErrorForField(input);
+                        if (!firstInvalid) {
+                            firstInvalid = input;
+                        }
+                    });
+
+                    if (hasEmptyRequired) {
+                        e.preventDefault();
+
+                        if (firstInvalid && typeof firstInvalid.focus === 'function') {
+                            firstInvalid.focus();
+                        }
+                        return;
+                    }
+
+                    const hasCustomInvalid = form.querySelectorAll('.is-invalid').length > 0;
+
+                    if (hasCustomInvalid) {
+                        e.preventDefault();
+                        showCustomSubmitError();
+
+                        firstInvalid = form.querySelector('.is-invalid');
+                        if (firstInvalid && typeof firstInvalid.focus === 'function') {
+                            firstInvalid.focus();
+                        }
+                        return;
+                    }
+
+                    // Get the sanitized value (10 digits starting with 9)
+                    const sanitizedValue = window.sanitizePhoneInput(phoneInput.value);
+
+                    if (sanitizedValue.length === 10) {
+                        // Create the full number in local format: 09XXXXXXXXX
+                        const fullNumber = '0' + sanitizedValue;
+                        phoneInput.value = fullNumber;
+                    }
+
+                    // Whitespace sanitization for name fields before submission
+                    form.querySelectorAll('input[name="first_name"], input[name="last_name"]').forEach(function (nameInput) {
+                        nameInput.value = nameInput.value.trim().replace(/\s{2,}/g, ' ');
+                    });
+                });
+            }
+
+            // Google OAuth loading state
+            const googleSignupBtn = document.getElementById('googleSignupBtn');
+            if (googleSignupBtn) {
+                googleSignupBtn.addEventListener('click', function (e) {
+                    // Show loading state immediately
+                    const btnText = this.querySelector('.google-btn-text');
+                    const spinner = this.querySelector('.google-spinner');
+                    const icon = this.querySelector('.google-icon');
+
+                    btnText.textContent = 'Connecting to Google...';
+                    spinner.style.display = 'inline-block';
+                    icon.style.opacity = '0.6';
+                    this.style.opacity = '0.8';
+                    this.style.pointerEvents = 'none';
+
+                    // Add subtle pulse animation
+                    this.classList.add('pulse-animation');
+
+                    // The actual navigation will happen via the href
+                    setTimeout(() => {
+                        // Add a brief delay to show the loading state
+                    }, 100);
+                });
+            }
+        });
+    </script>
+    {% endblock %}
+    <script src="{% static 'js/notifications.js' %}"></script>

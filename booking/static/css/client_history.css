@@ -1,0 +1,732 @@
+/* =========================
+   CLIENT BOOKING HISTORY
+========================= */
+
+.history-page {
+    padding: 10px 0 40px;
+}
+
+/* Page Header */
+.history-page-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.history-page-header h1 {
+    color: var(--bistre-brown);
+    font-weight: 700;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.history-page-header h1 i {
+    color: var(--red-violet);
+}
+
+.history-subtitle {
+    color: #888;
+    font-size: 0.95rem;
+    margin-top: 5px;
+}
+
+/* Stats Cards */
+.history-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+    border: 1px solid var(--eon-white);
+}
+
+/* Review and Artist Reply Section */
+.history-review-section {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid var(--bistre-brown);
+}
+
+/* Standalone review section - outside the history card */
+.history-review-section.standalone {
+    margin: 10px 0 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* History Card - Client Side (No Profile Circle) */
+.history-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.history-card:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.history-card::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--bistre-brown);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.history-card:hover::after {
+    transform: scaleX(1);
+}
+
+/* Date Badge - Now on the left side */
+.date-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: var(--bistre-brown);
+    color: white;
+    border-radius: 10px;
+    flex-shrink: 0;
+    order: -1;
+}
+
+.date-month {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.date-day {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Appointment Content */
+.appointment-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Service Name with Status Badge */
+.service-name-with-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.service-name-with-status h4 {
+    margin: 0;
+    color: var(--bistre-brown);
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex: 1;
+}
+
+.service-name-with-status .status-badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.appointment-header h4 {
+    margin: 0;
+    color: var(--bistre-brown);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.appointment-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.appointment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.artist-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+}
+
+.artist-info a {
+    color: var(--bistre-brown);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.artist-info a:hover {
+    text-decoration: underline;
+}
+
+.artist-rating-inline {
+    color: var(--bistre-brown);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+/* Date Badge Year Styling */
+.date-year {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+/* Enlarged Date Badge */
+.date-badge {
+    width: 70px !important;
+    height: 70px !important;
+    font-size: 1.1rem !important;
+}
+
+.date-month {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+}
+
+.date-day {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+.status-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Action Column */
+.history-action-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+/* Remove old styles that are no longer needed */
+.history-date-block,
+.history-details,
+.history-meta,
+.history-status-col {
+    display: none;
+}
+
+/* Hide profile circle on client side */
+.profile-circle {
+    display: none;
+}
+
+.review-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+}
+
+.review-date {
+    margin-left: auto;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.review-comment {
+    padding: 8px 0;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+/* Artist Reply Section - Inside the review box */
+.artist-reply-section {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(183, 170, 122, 0.1);
+    border-left: 3px solid var(--olive-beige);
+    border-radius: 8px;
+}
+
+.artist-reply-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.artist-reply-header i {
+    color: var(--bistre-brown);
+    font-size: 0.85rem;
+}
+
+.artist-reply-header strong {
+    color: var(--bistre-brown);
+    font-size: 0.85rem;
+}
+
+.artist-reply-header .reply-date {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.artist-reply-content {
+    color: #555;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.stat-icon.total {
+    background: rgba(134, 123, 24, 0.12);
+    color: var(--bistre-brown);
+}
+
+.stat-icon.completed {
+    background: rgba(40, 167, 69, 0.12);
+    color: #28a745;
+}
+
+.stat-icon.upcoming {
+    background: rgba(0, 123, 255, 0.12);
+    color: #007bff;
+}
+
+.stat-icon.cancelled {
+    background: rgba(140, 46, 62, 0.12);
+    color: var(--red-violet);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--bistre-brown);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Filter Pills */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.filter-pills {
+    display: inline-flex;
+    background: white;
+    padding: 5px;
+    border-radius: 30px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+    border: 1px solid var(--eon-white);
+    gap: 4px;
+}
+
+.filter-pill {
+    padding: 9px 20px;
+    background: transparent;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.filter-pill:hover {
+    color: var(--red-violet);
+}
+
+.filter-pill.active {
+    background: var(--red-violet);
+    color: white;
+    box-shadow: 0 3px 10px rgba(140, 46, 62, 0.2);
+}
+
+/* History List */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+.history-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+    border: 1px solid var(--eon-white);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    gap: 20px;
+}
+
+.history-card:hover {
+    transform: translateX(4px);
+    border-color: var(--olive-beige);
+}
+
+/* Date Block */
+.history-date-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--eon-white);
+    padding: 10px 18px;
+    border-radius: 12px;
+    min-width: 75px;
+    flex-shrink: 0;
+}
+
+.h-month {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.h-day {
+    font-size: 1.5rem;
+    color: var(--red-violet);
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.h-year {
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+/* Details */
+.history-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-service-name {
+    color: var(--bistre-brown);
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin: 0 0 6px;
+}
+
+.history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.meta-item {
+    color: #777;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.artist-public-link {
+    color: var(--bistre-brown);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.artist-public-link:hover {
+    text-decoration: underline;
+}
+
+.meta-item.price {
+    color: var(--bistre-brown);
+    font-weight: 600;
+}
+
+/* Status Column */
+.history-status-col {
+    flex-shrink: 0;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.finished-badge { background: #d4edda; color: #155724; }
+.cancelled-badge { background: #f8d7da; color: #721c24; }
+.waiting-badge { background: #fff3cd; color: #856404; }
+.approved-badge { background: #cce5ff; color: #004085; }
+.ongoing-badge { background: #d4e6ff; color: #0c5b9e; }
+
+/* Action Column */
+.history-action-col {
+    flex-shrink: 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.rebook-btn {
+    padding: 8px 18px;
+    background: white;
+    color: var(--bistre-brown);
+    border: 1px solid var(--bistre-brown);
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.rebook-btn:hover {
+    background: var(--bistre-brown);
+    color: white;
+}
+
+.delete-review-form {
+    margin: 0;
+}
+
+.delete-review-btn {
+    padding: 8px 14px;
+    background: #fff;
+    color: var(--red-violet);
+    border: 1px solid var(--red-violet);
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.delete-review-btn:hover {
+    background: var(--red-violet);
+    color: #fff;
+}
+
+/* Empty State */
+.empty-history {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+}
+
+.empty-icon {
+    font-size: 3.5rem;
+    color: var(--olive-beige);
+    margin-bottom: 15px;
+}
+
+.empty-history h3 {
+    color: var(--bistre-brown);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.empty-history p {
+    color: #888;
+    font-size: 0.95rem;
+    max-width: 400px;
+    margin: 0 auto 25px;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.empty-btn {
+    padding: 10px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.empty-btn.primary {
+    background: var(--red-violet);
+    color: white;
+}
+
+.empty-btn.primary:hover {
+    background: #7a2a3e;
+}
+
+.empty-btn.secondary {
+    background: white;
+    color: var(--bistre-brown);
+    border: 1px solid var(--bistre-brown);
+}
+
+.empty-btn.secondary:hover {
+    background: var(--bistre-brown);
+    color: white;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+    .history-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .history-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+        padding: 18px;
+    }
+
+    .history-date-block {
+        flex-direction: row;
+        gap: 8px;
+        width: 100%;
+        background: transparent;
+        border-bottom: 1px solid var(--eon-white);
+        border-radius: 0;
+        padding: 0 0 12px;
+        min-width: auto;
+    }
+
+    .h-day {
+        font-size: 1.1rem;
+    }
+
+    .history-meta {
+        justify-content: center;
+    }
+
+    .history-status-col {
+        margin: 5px 0;
+    }
+
+    .filter-pills {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .history-page-header h1 {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .history-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .filter-pill {
+        padding: 7px 14px;
+        font-size: 0.82rem;
+    }
+}

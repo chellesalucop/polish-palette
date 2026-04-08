@@ -1,0 +1,53 @@
+services:
+  # Web Service
+  - type: web
+    name: polish-palette
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn nail_booking.wsgi:application --bind 0.0.0.0:$PORT"
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: polish-palette-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: polish-palette-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: polish-palette-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: polish-palette-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: polish-palette-db
+          property: database
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USE_TLS
+        value: True
+      - key: DEFAULT_FROM_EMAIL
+        value: noreply@polishpalette.com
+
+  # PostgreSQL Database
+  - type: postgres
+    name: polish-palette-db
+    plan: free
+    ipAllowList: []

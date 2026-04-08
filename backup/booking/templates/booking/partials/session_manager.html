@@ -1,0 +1,66 @@
+{% for appointment in session_manager_today %}
+<div class="appointment-card p-3 mb-3 border-start border-4" style="border-color: white; background: white;" data-status="{{ appointment.status }}">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <span class="fw-bold" style="color: var(--bistre-brown);">{{ appointment.client.get_full_name }}</span>
+            <span class="badge" style="background: var(--bistre-brown); color: white; margin-left: 8px;">{{ appointment.time|time:"g:i A" }}</span>
+            {% if appointment.status == 'Approved' %}
+                <span class="badge" style="background: var(--red-violet); color: white; margin-left: 8px;">Confirmed</span>
+            {% elif appointment.status == 'On-going' %}
+                <span class="badge" style="background: var(--bistre-brown); color: white; margin-left: 8px;">In Progress</span>
+            {% elif appointment.status == 'Completed' %}
+                <span class="badge" style="background: var(--bistre-brown); color: white; margin-left: 8px;">Completed</span>
+            {% elif appointment.status == 'Cancelled' %}
+                <span class="badge" style="background: var(--red-violet); color: white; margin-left: 8px;">Cancelled</span>
+            {% endif %}
+        </div>
+        <div class="ms-auto">
+            <small style="color: var(--bistre-brown);">Service: {{ appointment.service.name }}</small>
+            {% if appointment.reference_code %}
+                <div class="mt-2">
+                    <small style="color: var(--red-violet);">Design Reference: 
+                        {% if appointment.gallery_reference %}
+                            {{ appointment.gallery_reference.title }}
+                        {% elif "gallery_" in appointment.reference_code %}
+                            Gallery Design #{{ appointment.reference_code|slice:"7:" }}
+                        {% else %}
+                            Custom Upload
+                        {% endif %}
+                    </small>
+                </div>
+            {% endif %}
+            {% if appointment.custom_art_description %}
+                <div class="mt-2">
+                    <small style="color: var(--red-violet);">Art Description: {{ appointment.custom_art_description }}</small>
+                </div>
+            {% endif %}
+            {% if appointment.notes %}
+                <div class="mt-2">
+                    <small style="color: var(--red-violet);">Notes: {{ appointment.notes }}</small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if appointment.status == 'Approved' %}
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm" style="background: var(--red-violet); color: white; border-radius: 6px; font-weight: 600; margin-right: 8px; border: none;" onclick="commandCenter.startSession({{ appointment.id }})">
+                <i class="bi bi-play-circle me-1"></i>
+                Start Session
+            </button>
+        </div>
+    {% elif appointment.status == 'On-going' %}
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm" style="background: var(--bistre-brown); color: white; border-radius: 6px; font-weight: 600; border: none;" onclick="commandCenter.finishSession({{ appointment.id }})">
+                <i class="bi bi-check-circle me-1"></i>
+                Finish & Sanitize
+            </button>
+        </div>
+    {% endif %}
+</div>
+{% empty %}
+<div class="text-center py-5">
+    <i class="bi bi-calendar-x display-4" style="color: var(--red-violet);"></i>
+    <p class="mb-0 mt-2" style="color: var(--bistre-brown);">No appointments scheduled for today.</p>
+</div>
+{% endfor %}

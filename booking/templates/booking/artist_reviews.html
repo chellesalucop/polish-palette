@@ -1,0 +1,358 @@
+{% extends "booking/artist_base.html" %}
+{% load static %}
+
+{% block title %}Client Reviews - PolishPalette{% endblock %}
+{% block body_class %}artist-reviews-page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/artist_reviews.css' %}">
+<style>
+    /* Burger Button Styling */
+    .burger-btn {
+        background: var(--bistre-brown);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        min-width: 44px;
+        height: 40px;
+        box-shadow: 0 4px 12px rgba(134, 123, 24, 0.3);
+    }
+
+    .burger-btn:hover,
+    .burger-btn.active {
+        background: #6f6614;
+        color: white;
+        box-shadow: 0 4px 16px rgba(134, 123, 24, 0.4);
+    }
+
+    .burger-btn:active {
+        transform: scale(0.98);
+    }
+
+    .burger-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .burger-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    .btn-brand {
+        background-color: var(--bistre-brown, #867B18);
+        border-color: var(--bistre-brown, #867B18);
+        color: white;
+        border-radius: 8px;
+    }
+
+    .btn-brand:hover,
+    .btn-brand:focus {
+        background-color: #6f6614;
+        border-color: #6f6614;
+        color: white;
+    }
+
+    /* Desktop: ensure sidebar is always visible, even after mobile resize */
+    @media (min-width: 993px) {
+        #artistSidebar {
+            display: flex !important;
+            flex-direction: column !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: sticky !important;
+            top: 0;
+            width: 280px !important;
+            min-width: 280px !important;
+            max-width: 280px !important;
+            height: 100vh !important;
+            transform: none !important;
+            overflow: hidden !important;
+        }
+
+        #artistSidebar.collapsed {
+            transform: none !important;
+            width: 280px !important;
+            min-width: 280px !important;
+            overflow: hidden !important;
+        }
+
+        #artistSidebar .sidebar-nav {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-x: hidden !important;
+        }
+
+        .layout-wrapper.client-sidebar-page {
+            display: flex !important;
+        }
+
+        #leftSidebarToggle {
+            display: none !important;
+        }
+    }
+
+    /* Mobile Hard Reset - match artist_base.css specificity */
+    @media (max-width: 992px) {
+        .layout-wrapper.client-sidebar-page {
+            display: block !important;
+            grid-template-columns: none !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 280px !important;
+            height: 100vh !important;
+            z-index: 2000 !important;
+            transform: translateX(-100%) !important;
+            transition: transform 0.3s ease-in-out;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            background: #fff !important;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            min-width: 0 !important;
+            border: none !important;
+        }
+
+        body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar:not(.collapsed) {
+            transform: translateX(0) !important;
+        }
+
+        body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar.collapsed {
+            transform: translateX(-100%) !important;
+        }
+
+        .client-sidebar {
+            position: fixed !important;
+            min-width: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .client-main-content {
+            min-height: 0 !important;
+            height: auto !important;
+            position: relative !important;
+            top: 0 !important;
+            display: block !important;
+            width: 100% !important;
+            padding-top: 60px !important;
+            margin: 0 !important;
+        }
+
+        #artistSidebar .sidebar-nav {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-x: hidden !important;
+            overflow-y: auto;
+            padding-top: 50px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reviews-page">
+    <div class="container">
+        <!-- Page Header with Sorting -->
+        <div class="reviews-header">
+            <h2>Client Reviews</h2>
+            <div class="reviews-controls">
+                <div class="sort-dropdown">
+                    <label for="sort-select">Sort by:</label>
+                    <select id="sort-select" onchange="changeSort(this.value)">
+                        <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                        <option value="highest_rated" {% if sort_by == 'highest_rated' %}selected{% endif %}>Highest Rated</option>
+                        <option value="lowest_rated" {% if sort_by == 'lowest_rated' %}selected{% endif %}>Lowest Rated</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Summary with Breakdown -->
+        <div class="rating-summary-section">
+            <div class="rating-content-wrapper">
+                <!-- Rating Value Side Column -->
+                <div class="rating-side-column">
+                    <div class="rating-value-side">{{ avg_rating|floatformat:1 }}</div>
+                    <div class="rating-side-text">
+                        <span class="rating-stars">
+                            {% for _ in "12345" %}<i class="bi bi-star-fill"></i>{% endfor %}
+                        </span>
+                        <span class="rating-count">{{ total_reviews }} review{{ total_reviews|pluralize }}</span>
+                    </div>
+                </div>
+                
+                <!-- Rating Breakdown Main Column -->
+                <div class="rating-breakdown">
+                    {% for rating, data in rating_breakdown.items %}
+                    <div class="rating-bar-item">
+                        <div class="rating-number">{{ rating }}</div>
+                        <div class="rating-bar-container">
+                            <div class="rating-bar" style="width: {{ data.percentage|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        {% if reviews %}
+        <div class="reviews-list">
+            {% for review in reviews %}
+            <div class="review-card {% if review.artist_reply %}has-reply{% endif %}">
+                <div class="service-header">
+                    <h4>{{ review.appointment.service.name }}</h4>
+                </div>
+                <div class="review-content-wrapper">
+                    <div class="review-header">
+                        <div class="profile-circle">
+                            {% if review.client and review.client.profile_picture %}
+                                <img src="{{ review.client.profile_picture.url }}" alt="{{ review.client.get_full_name }}">
+                            {% else %}
+                                <img src="{% static 'images/pfp/default-avatar.png' %}" alt="Default Profile">
+                            {% endif %}
+                        </div>
+                        <div class="review-content">
+                            <div class="review-top">
+                                <div>
+                                    <h5>{% if review.client %}{{ review.client.get_full_name }}{% else %}Deleted Client{% endif %}</h5>
+                                    <p>{{ review.created_at|date:"M d, Y" }}</p>
+                                </div>
+                                <div class="rating-stars">
+                                    {% for _ in "12345" %}
+                                        {% if forloop.counter <= review.rating %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if review.comment %}
+                <div class="client-comment-above-reply">
+                    <p class="public-comment">{{ review.comment }}</p>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'artist_review_reply' review.id %}" class="reply-form">
+                    {% csrf_token %}
+                    <label>Reply to client review</label>
+                    <textarea name="artist_reply" rows="2" maxlength="500" placeholder="Write your response...">{{ review.artist_reply }}</textarea>
+                    <button type="submit">Reply</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if reviews.has_previous %}
+                <a href="?page=1&sort={{ sort_by }}" class="pagination-link">&laquo; First</a>
+                <a href="?page={{ reviews.previous_page_number }}&sort={{ sort_by }}" class="pagination-link">&lsaquo; Previous</a>
+            {% endif %}
+            
+            <span class="pagination-info">
+                Page {{ reviews.number }} of {{ reviews.paginator.num_pages }}
+            </span>
+            
+            {% if reviews.has_next %}
+                <a href="?page={{ reviews.next_page_number }}&sort={{ sort_by }}" class="pagination-link">Next &rsaquo;</a>
+                <a href="?page={{ reviews.paginator.num_pages }}&sort={{ sort_by }}" class="pagination-link">Last &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-chat-square-heart"></i>
+            <p>No reviews yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function changeSort(sortBy) {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sortBy);
+    url.searchParams.delete('page'); // Reset to first page when sorting
+    window.location.href = url.toString();
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const leftSidebar = document.getElementById('artistSidebar');
+    const leftToggle = document.getElementById('leftSidebarToggle');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isMobile = () => window.innerWidth < 992;
+
+    if (leftSidebar && leftToggle) {
+        const observer = new MutationObserver(function() {
+            if (!isMobile()) return;
+            leftToggle.style.display = leftSidebar.classList.contains('collapsed') ? '' : 'none';
+        });
+        observer.observe(leftSidebar, { attributes: true, attributeFilter: ['class'] });
+
+        leftToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!isMobile() || !leftSidebar) return;
+            if (leftSidebar.classList.contains('collapsed')) {
+                leftSidebar.classList.remove('collapsed');
+                leftToggle.style.display = 'none';
+                if (overlay) overlay.classList.add('show');
+            } else {
+                leftSidebar.classList.add('collapsed');
+                leftToggle.style.display = '';
+                if (overlay) overlay.classList.remove('show');
+            }
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            if (!isMobile() || !leftSidebar) return;
+            leftSidebar.classList.add('collapsed');
+            overlay.classList.remove('show');
+            if (leftToggle) leftToggle.style.display = '';
+            document.body.style.overflow = '';
+        });
+    }
+
+    window.addEventListener('resize', function() {
+        if (!isMobile()) {
+            if (overlay) overlay.classList.remove('show');
+            if (leftToggle) leftToggle.style.display = '';
+            if (leftSidebar) leftSidebar.classList.remove('collapsed');
+            document.body.style.overflow = '';
+        } else {
+            if (leftSidebar && !leftSidebar.classList.contains('collapsed')) {
+                leftSidebar.classList.add('collapsed');
+            }
+            if (overlay) overlay.classList.remove('show');
+            if (leftToggle) leftToggle.style.display = '';
+            document.body.style.overflow = '';
+        }
+    });
+});
+</script>
+{% endblock %}

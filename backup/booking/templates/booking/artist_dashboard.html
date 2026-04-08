@@ -1,0 +1,498 @@
+{% extends "booking/artist_base.html" %}
+{% load static %}
+{% load status_filters %}
+
+{% block title %}Dashboard - PolishPalette{% endblock %}
+{% block page_title %}Artist Dashboard{% endblock %}
+{% block body_class %}artist-dashboard-page{% if artist.status %} artist-status-{{ artist.status|lower }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/artist_dashboard.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<meta name="artist-id" content="{{ artist.id }}">
+<button class="btn btn-brand d-lg-none" id="leftSidebarToggle"
+        style="position: fixed; top: 15px; left: 15px; z-index: 2100; border-radius: 50%; width: 45px; height: 45px;">
+    <i class="bi bi-list"></i>
+</button>
+
+<button class="btn btn-brand floating-mobile-btn-right" id="rightSidebarToggle" type="button" aria-label="Toggle calendar and files panel">
+    <i class="bi bi-calendar3"></i>
+</button>
+
+<div class="artist-dashboard-fit">
+    <div class="status-section mb-2">
+        <div class="status-card-alt shadow-sm p-2 rounded">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Current Work Status</small>
+                    <h4 class="mb-0 fw-bold" style="color: var(--brand-primary);">{{ status }}</h4>
+                </div>
+                <div class="status-indicator px-3 py-1 rounded-pill bg-light border">
+                    <span class="status-dot {% if status == 'Available' %}bg-success{% else %}bg-warning{% endif %}"></span>
+                    <span class="fw-bold">{{ status }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="approval-section mb-3">
+        <h5 class="dashboard-section-title"><i class="bi bi-person-check me-2"></i>Pending Client Approvals</h5>
+        <input type="hidden" id="globalCSRFToken" value="{{ csrf_token }}">
+        <div class="list-group shadow-sm rounded overflow-hidden">
+            {% for appointment in pending_requests %}
+            <div class="list-group-item p-3 bg-white">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="fw-bold text-primary">{{ appointment.client.get_full_name }}</span>
+                            {% if appointment.status == 'Rescheduling' %}
+                                <span class="badge bg-info text-dark ms-2">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Client is choosing a new time…
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark ms-2">Waiting Approval</span>
+                            {% endif %}
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Service</small>
+                                <span class="fw-semibold">{{ appointment.service.name }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Date</small>
+                                <span class="fw-semibold">{{ appointment.date|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Time</small>
+                                <span class="fw-semibold">{{ appointment.time|time:"g:i A" }}</span>
+                            </div>
+                        </div>
+                        {% if appointment.reference_code %}
+                            <div class="mt-2">
+                                <small class="text-muted">Design Reference: 
+                                    {% if appointment.gallery_reference %}
+                                        <span class="badge bg-info text-dark">{{ appointment.gallery_reference.title }}</span>
+                                    {% elif "gallery_" in appointment.reference_code %}
+                                        <span class="badge bg-info text-dark">Gallery Design #{{ appointment.reference_code|slice:"7:" }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Custom Upload</span>
+                                    {% endif %}
+                                </small>
+                                
+                                <div class="mt-2">
+                                    {% if appointment.gallery_reference %}
+                                        <img src="{% if appointment.gallery_reference.image %}{{ appointment.gallery_reference.image.url }}{% else %}{{ appointment.gallery_reference.image_url }}{% endif %}" alt="Gallery Reference" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                    {% elif not "gallery_" in appointment.reference_code %}
+                                        <img src="/media/{{ appointment.reference_code }}" alt="Custom Upload" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if appointment.custom_art_description %}
+                            <div class="mt-2">
+                                <small class="text-muted">Art Description: {{ appointment.custom_art_description }}</small>
+                            </div>
+                        {% endif %}
+                        {% if appointment.notes %}
+                            <div class="mt-2">
+                                <small class="text-muted">Notes: {{ appointment.notes }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="button" class="btn btn-success btn-sm approve-btn" data-id="{{ appointment.id }}">
+                        <i class="bi bi-check-circle me-1"></i>Approve
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm reject-btn" data-id="{{ appointment.id }}">
+                        <i class="bi bi-x-circle me-1"></i>Reject
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="list-group-item text-center py-3 bg-white text-muted">
+                <p class="mb-0">No pending approvals right now.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+    function getCSRFToken() {
+        var tokenInput = document.getElementById('globalCSRFToken');
+        return tokenInput ? tokenInput.value : '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.approve-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                handleApproveReject('approve_request', btn.dataset.id, btn);
+            });
+        });
+        document.querySelectorAll('.reject-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                handleApproveReject('reject_request', btn.dataset.id, btn);
+            });
+        });
+
+        window.commandCenter = {
+            startSession: function(appointmentId) {
+                if (confirm('Are you sure you want to start this session?')) {
+                    fetch("{% url 'artist_start_session' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-CSRFToken": getCSRFToken()
+                        },
+                        body: `appointment_id=${appointmentId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error starting session.');
+                    });
+                }
+            },
+            
+            finishSession: function(appointmentId) {
+                if (confirm('Are you sure you want to finish this session?')) {
+                    fetch("{% url 'finish_session' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-CSRFToken": getCSRFToken()
+                        },
+                        body: `appointment_id=${appointmentId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error finishing session.');
+                    });
+                }
+            },
+            
+            updateDashboardStats: function() {
+                console.log('Dashboard stats updated');
+            },
+            
+            startPeriodicUpdates: function() {
+                console.log('Periodic updates started');
+            },
+            
+            initializeCommandCenter: function() {
+                console.log('Command center initialized');
+            },
+            
+            initializeCalendar: function() {
+                console.log('Calendar initialized');
+            }
+        };
+
+        function handleApproveReject(action, appointmentId, btn) {
+            fetch("{% url 'artist_approve_reject' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: `action=${action}&appointment_id=${appointmentId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    var card = btn.closest('.list-group-item');
+                    card.parentNode.removeChild(card);
+                    alert(data.message);
+                    updateUpcomingLog();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(() => {
+                alert('Error processing request.');
+            });
+        }
+
+        function updateUpcomingLog() {
+            fetch("{% url 'artist_dashboard' %}", {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(response => response.text())
+            .then(html => {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+                var newLog = doc.querySelector('.schedule-section');
+                var logSection = document.querySelector('.schedule-section');
+                if (newLog && logSection) {
+                    logSection.innerHTML = newLog.innerHTML;
+                }
+            })
+            .catch(() => {
+                console.log('Error updating upcoming log');
+            });
+        }
+    });
+    </script>
+
+    <section class="command-center-section mb-4">
+        <div class="command-header" style="background: var(--bistre-brown); color: white; border-radius: 6px 6px 0 0; padding: 18px 32px;">
+            <h5 class="fw-bold mb-0" id="current-view-title">
+                <i class="bi bi-clock-history me-2"></i>
+                Session Manager
+            </h5>
+        </div>
+        <div class="command-content" style="background: white; border-radius: 0 0 6px 6px;">
+            <div class="active-jobs-list">
+                {% for appointment in session_manager_today %}
+                    <div class="appointment-card p-3 mb-3 border-start border-4" style="border-color: white; background: white;" data-status="{{ appointment.status }}">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="fw-bold" style="color: var(--bistre-brown);">{{ appointment.client.get_full_name }}</span>
+                                <span class="badge" style="background: var(--bistre-brown); color: white; margin-left: 8px;">{{ appointment.time|time:"g:i A" }}</span>
+                                {% if appointment.status == 'Approved' %}
+                                    <span class="badge" style="background: var(--red-violet); color: white; margin-left: 8px;">Confirmed</span>
+                                {% elif appointment.status == 'On-going' %}
+                                    <span class="badge" style="background: var(--bistre-brown); color: white; margin-left: 8px;">In Progress</span>
+                                {% elif appointment.status == 'Completed' %}
+                                    <span class="badge" style="background: var(--bistre-brown); color: white; margin-left: 8px;">Completed</span>
+                                {% elif appointment.status == 'Cancelled' %}
+                                    <span class="badge" style="background: var(--red-violet); color: white; margin-left: 8px;">Cancelled</span>
+                                {% endif %}
+                            </div>
+                            <div class="ms-auto">
+                                <small style="color: var(--bistre-brown);">Service: {{ appointment.service.name }}</small>
+                                {% if appointment.reference_code %}
+                                    <div class="mt-2">
+                                        <small style="color: var(--red-violet);">Design Reference: 
+                                            {% if appointment.gallery_reference %}
+                                                {{ appointment.gallery_reference.title }}
+                                            {% elif "gallery_" in appointment.reference_code %}
+                                                Gallery Design #{{ appointment.reference_code|slice:"7:" }}
+                                            {% else %}
+                                                Custom Upload
+                                            {% endif %}
+                                        </small>
+                                        
+                                        <div class="mt-2">
+                                            {% if appointment.gallery_reference %}
+                                                <img src="{% if appointment.gallery_reference.image %}{{ appointment.gallery_reference.image.url }}{% else %}{{ appointment.gallery_reference.image_url }}{% endif %}" alt="Gallery Reference" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                            {% elif not "gallery_" in appointment.reference_code %}
+                                                <img src="/media/{{ appointment.reference_code }}" alt="Custom Upload" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                {% if appointment.custom_art_description %}
+                                    <div class="mt-2">
+                                        <small style="color: var(--red-violet);">Art Description: {{ appointment.custom_art_description }}</small>
+                                    </div>
+                                {% endif %}
+                                {% if appointment.notes %}
+                                    <div class="mt-2">
+                                        <small style="color: var(--red-violet);">Notes: {{ appointment.notes }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if appointment.status == 'Approved' %}
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-sm" style="background: var(--red-violet); color: white; border-radius: 6px; font-weight: 600; margin-right: 8px; border: none;" onclick="commandCenter.startSession('{{ appointment.id }}')">
+                                    <i class="bi bi-play-circle me-1"></i>
+                                    Start Session
+                                </button>
+                            </div>
+                        {% elif appointment.status == 'On-going' %}
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-sm" style="background: var(--bistre-brown); color: white; border-radius: 6px; font-weight: 600; border: none;" onclick="commandCenter.finishSession('{{ appointment.id }}')">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Finish & Sanitize
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x display-4" style="color: var(--red-violet);"></i>
+                        <p class="mb-0 mt-2" style="color: var(--bistre-brown);">No appointments scheduled for today.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    {% if completed_sessions_today %}
+    <section class="completed-sessions-section mb-4">
+        <div class="command-header" style="background: var(--eon-white); color: var(--bistre-brown); border-radius: 6px 6px 0 0; padding: 18px 32px;">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-check-circle me-2"></i>
+                Completed Sessions Today
+            </h5>
+        </div>
+        <div class="command-content" style="background: white; border-radius: 0 0 6px 6px;">
+            <div class="active-jobs-list">
+                {% for appointment in completed_sessions_today %}
+                    <div class="appointment-card p-3 mb-3 border-start border-4" style="border-color: var(--eon-white); background: var(--eon-white); opacity: 0.8;" data-status="{{ appointment.status }}">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="fw-bold" style="color: var(--bistre-brown);">{{ appointment.client.get_full_name }}</span>
+                                <span class="badge" style="background: var(--eon-white); color: var(--bistre-brown); margin-left: 8px;">{{ appointment.time|time:"g:i A" }}</span>
+                                <span class="badge" style="background: #28a745; color: white; margin-left: 8px;">Completed</span>
+                            </div>
+                            <div class="ms-auto">
+                                <small style="color: var(--bistre-brown);">Service: {{ appointment.service.name }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <div class="schedule-section">
+        <h5 class="dashboard-section-title"><i class="bi bi-calendar-check me-2"></i>Today's Queue</h5>
+        <div class="list-group shadow-sm rounded overflow-hidden">
+            {% for appointment in today_schedule %}
+            <div class="list-group-item d-flex justify-content-between align-items-center p-2 bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="text-center me-4 border-end pe-4" style="min-width: 80px;">
+                        <span class="fw-bold d-block" style="color: var(--brand-primary);">{{ appointment.time|time:"g:i" }}</span>
+                        <small class="text-muted text-uppercase" style="font-size: 0.7rem;">{{ appointment.time|time:"A" }}</small>
+                    </div>
+                    <div>
+                        <span class="fw-bold d-block">{{ appointment.client.get_full_name }}</span>
+                        <small class="text-muted">{{ appointment.service.name }}</small>
+                    </div>
+                </div>
+                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">{{ appointment.status }}</span>
+            </div>
+            {% empty %}
+            <div class="list-group-item text-center py-2 bg-white text-muted">
+                <p class="mb-0">No appointments for today.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block right_sidebar %}
+<aside class="layout-nav-right modern-sidebar" id="rightSidebar">
+    <div class="mb-4 d-grid">
+        <a href="{% url 'ai_portfolio_manager' %}" class="btn btn-brand shadow-sm fw-bold d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-stars"></i> AI Portfolio Manager
+        </a>
+    </div>
+
+    <div class="calendar-container modern-calendar-card" style="max-width: 100% !important; background: var(--eon-white); color: var(--bistre-brown); border-radius: 16px; box-shadow: 0 4px 16px rgba(140,46,62,0.08);">
+        <h6 class="fw-bold mb-3 small" style="color: var(--bistre-brown);">Calendar</h6>
+        <div class="calendar-navigation d-flex justify-content-between align-items-center mb-2">
+            <button class="btn btn-sm btn-link text-dark p-0" id="prevMonth">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <h6 id="currentMonth" class="mb-0 fw-bold text-uppercase" style="font-size: 0.85rem; color: var(--bistre-brown);">Loading...</h6>
+            <button class="btn btn-sm btn-link text-dark p-0" id="nextMonth">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+        <div id="calendarGrid" class="mb-2">
+            </div>
+    </div>
+
+    <div class="upcoming-log-section mt-4 modern-card" style="background: var(--eon-white); border-radius: 16px; box-shadow: 0 2px 8px rgba(183,170,122,0.08);">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="dashboard-section-title mb-0" style="color: var(--bistre-brown);"><i class="bi bi-clock-history me-2"></i>Upcoming Log</h6>
+                <small class="text-muted">Artist: {% if request.artist %}{{ request.artist.get_full_name }}{% else %}{{ request.user.get_full_name }}{% endif %}</small>
+            </div>
+            <a href="{% url 'artist_schedule' %}" class="btn btn-xs btn-outline-primary">View More</a>
+        </div>
+        <div class="list-group shadow-sm rounded overflow-hidden" id="upcomingLogList" style="background: var(--eon-white);">
+            {% for appointment in upcoming_bookings|dictsort:"date" %}
+                {% if forloop.counter <= 5 %}
+                <div class="list-group-item p-2 bg-transparent upcoming-item" 
+                     data-date="{{ appointment.date|date:'Y-m-d' }}" 
+                     data-time="{{ appointment.time|time:'H:i' }}" style="border-radius: 12px; margin-bottom: 8px; background: var(--eon-white); box-shadow: 0 2px 8px rgba(183,170,122,0.08);">
+                    <div class="d-flex align-items-center">
+                        <div class="date-badge text-center me-3 p-1 rounded" style="background: rgba(140, 46, 62, 0.12); min-width: 50px;">
+                            <span class="fw-bold d-block" style="font-size: 1rem; color: var(--red-violet);">{{ appointment.date|date:"d" }}</span>
+                            <small class="text-uppercase" style="font-size: 0.7rem; color: var(--bistre-brown);">{{ appointment.date|date:"M" }}</small>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold small" style="color: var(--bistre-brown);">{{ appointment.client.get_full_name }}</span>
+                                <span class="badge {% if appointment.status == 'Approved' %}bg-success{% else %}bg-warning{% endif %}" style="font-size: 0.65rem;">
+                                    {{ appointment.status }}
+                                </span>
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.8rem; color: var(--red-violet);">
+                                <i class="bi bi-clock me-1"></i>{{ appointment.time|time:"g:i A" }} — {{ appointment.service.name }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% empty %}
+                <div class="list-group-item text-center py-3 bg-transparent text-muted" style="background: var(--eon-white);">
+                    <p class="mb-0 small">No upcoming bookings.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</aside>
+{% endblock right_sidebar %}
+
+{% block extra_js %}
+<input type="hidden" id="globalCSRFToken" value="{{ csrf_token }}">
+
+<script src="{% static 'js/form-resubmission-prevention.js' %}"></script>
+
+<script>
+    var bookedDatesStr = "{% for appointment in upcoming_bookings %}{{ appointment.date|date:'Y-m-d' }},{% endfor %}";
+    window.BOOKED_DATES = bookedDatesStr.split(',').filter(Boolean);
+</script>
+
+<script src="{% static 'js/artist_dashboard.js' %}"></script>
+
+<script>
+// Start periodic updates
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof commandCenter !== 'undefined') {
+        commandCenter.startPeriodicUpdates();
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock extra_js %}

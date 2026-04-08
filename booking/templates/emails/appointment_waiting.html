@@ -1,0 +1,54 @@
+{% extends "emails/base_email.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Appointment Request Received</h2>
+<p>Hello <strong>{{ client_name }}</strong>,</p>
+
+<p>Thank you for choosing Polish Palette for your nail appointment! We've received your booking request and are pleased to confirm the details below:</p>
+
+<div class="detail-card">
+  <div class="detail-row">
+    <span class="detail-label">Service:</span>
+    <span class="detail-value">{{ service_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Date:</span>
+    <span class="detail-value">{{ appointment_date }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Time:</span>
+    <span class="detail-value">{{ appointment_time }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Artist:</span>
+    <span class="detail-value">{{ artist_name }}</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Status:</span>
+    <span class="detail-value">
+      <span class="status-badge status-waiting">Waiting for Approval</span>
+    </span>
+  </div>
+  {% if reference_info %}
+  <div class="detail-row">
+    <span class="detail-label">Reference:</span>
+    <span class="detail-value">{{ reference_info }}</span>
+  </div>
+  {% endif %}
+</div>
+
+<p><strong>What happens next?</strong></p>
+<p>Your booking request has been sent to <strong>{{ artist_name }}</strong> for review. You will receive a notification email once the artist responds to your request.</p>
+<p>The artist typically responds within:</p>
+<ul>
+  <li>2-4 hours during business hours</li>
+  <li>24 hours for appointments booked outside business hours</li>
+</ul>
+
+<p>You can check the status of your booking request anytime in your <a href="{{ appointments_url }}" style="color: #8C2E3E; text-decoration: none;">appointments dashboard</a>.</p>
+
+<p style="margin-top: 20px;">
+  <a href="{{ appointments_url }}" class="cta-btn">View My Appointments</a>
+</p>
+{% endblock %}

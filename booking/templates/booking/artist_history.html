@@ -1,0 +1,500 @@
+{% extends "booking/artist_base.html" %}
+{% load static %}
+
+{% block title %}Service History - PolishPalette{% endblock %}
+{% block page_title %}Service History{% endblock %}
+{% block body_class %}artist-history-page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/artist_history.css' %}">
+<style>
+    /* Hide base-template hamburger; this page has its own #leftSidebarToggle */
+    body.artist-history-page #mobileToggle { display: none !important; }
+
+    :root {
+        --brand-primary: #867B18; /* Bistre Brown */
+        --brand-accent: #B7AA7A;  /* Olive Beige */
+    }
+
+    
+    .section-title-alt {
+        color: var(--brand-primary);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 1.1rem;
+        border-bottom: 2px solid var(--brand-accent);
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    /* Space Management Styles */
+    .extra-content {
+        display: none; /* Hidden by default */
+    }
+
+    .toggle-btn {
+        color: var(--brand-primary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-block;
+        margin-top: 10px;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .toggle-btn:hover {
+        color: #5c5410;
+        text-decoration: underline;
+    }
+
+    .btn-brand {
+        background-color: var(--brand-primary);
+        border-color: var(--brand-primary);
+        color: white;
+        border-radius: 8px;
+    }
+
+    .btn-brand:hover,
+    .btn-brand:focus {
+        background-color: #6f6614;
+        border-color: #6f6614;
+        color: white;
+    }
+
+    /* Desktop: ensure sidebar is always visible, even after mobile resize */
+    @media (min-width: 993px) {
+        #artistSidebar {
+            display: flex !important;
+            flex-direction: column !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: sticky !important;
+            top: 0;
+            width: 280px !important;
+            min-width: 280px !important;
+            max-width: 280px !important;
+            height: 100vh !important;
+            transform: none !important;
+            overflow: hidden !important;
+        }
+
+        #artistSidebar.collapsed {
+            transform: none !important;
+            width: 280px !important;
+            min-width: 280px !important;
+            overflow: hidden !important;
+        }
+
+        #artistSidebar .sidebar-nav {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-x: hidden !important;
+        }
+
+        .layout-wrapper.client-sidebar-page {
+            display: flex !important;
+        }
+
+        #leftSidebarToggle {
+            display: none !important;
+        }
+    }
+
+    /* Mobile Hard Reset - match artist_base.css specificity */
+    @media (max-width: 992px) {
+        .layout-wrapper.client-sidebar-page {
+            display: block !important;
+            grid-template-columns: none !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 280px !important;
+            height: 100vh !important;
+            z-index: 2000 !important;
+            transform: translateX(-100%) !important;
+            transition: transform 0.3s ease-in-out;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            background: #fff !important;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            min-width: 0 !important;
+            border: none !important;
+        }
+
+        body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar:not(.collapsed) {
+            transform: translateX(0) !important;
+        }
+
+        body.client-sidebar-page .layout-wrapper.client-sidebar-page aside.client-sidebar#artistSidebar.collapsed {
+            transform: translateX(-100%) !important;
+        }
+
+        .client-sidebar {
+            position: fixed !important;
+            min-width: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .client-main-content {
+            min-height: 0 !important;
+            height: auto !important;
+            position: relative !important;
+            top: 0 !important;
+            display: block !important;
+            width: 100% !important;
+            padding-top: 80px !important;
+            margin: 0 !important;
+        }
+
+        #artistSidebar .sidebar-nav {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-x: hidden !important;
+            overflow-y: auto;
+            padding-top: 50px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<button class="btn btn-brand d-lg-none" id="leftSidebarToggle"
+        style="position: fixed; top: 15px; left: 15px; z-index: 2100; border-radius: 50%; width: 45px; height: 45px;">
+    <i class="bi bi-list"></i>
+</button>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card shadow-sm p-3 rounded">
+                <small class="text-muted text-uppercase fw-bold">Total Services</small>
+                <h3 class="fw-bold mb-0" style="color: var(--brand-primary);">{{ total_services }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card shadow-sm p-3 rounded">
+                <small class="text-muted text-uppercase fw-bold">Completed</small>
+                <h3 class="fw-bold mb-0 text-success">{{ completed_count }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card shadow-sm p-3 rounded">
+                <small class="text-muted text-uppercase fw-bold">No-Shows</small>
+                <h3 class="fw-bold mb-0 text-warning">{{ no_show_count }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card shadow-sm p-3 rounded">
+                <small class="text-muted text-uppercase fw-bold">Cancellations</small>
+                <h3 class="fw-bold mb-0 text-danger">{{ cancelled_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            
+            <h5 class="section-title-alt"><i class="bi bi-shield-exclamation me-2"></i>Client Watchlist</h5>
+            <div class="watchlist-container bg-white shadow-sm rounded p-3 mb-4">
+                {% if clients_with_warnings %}
+                    {% for client in clients_with_warnings|slice:":5" %}
+                    <div class="p-3 mb-2 rounded {% if client.no_show_warnings >= 2 %}border border-danger bg-danger-subtle{% else %}bg-light{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ client.get_full_name }}</h6>
+                                <small class="text-muted">{{ client.email }}</small>
+                            </div>
+                            <span class="badge {% if client.no_show_warnings >= 2 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                {{ client.no_show_warnings }} Warnings
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if clients_with_warnings|length > 5 %}
+                    <div id="extra-watchlist" class="extra-content">
+                        {% for client in clients_with_warnings|slice:"5:" %}
+                        <div class="p-3 mb-2 rounded {% if client.no_show_warnings >= 2 %}border border-danger bg-danger-subtle{% else %}bg-light{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ client.get_full_name }}</h6>
+                                    <small class="text-muted">{{ client.email }}</small>
+                                </div>
+                                <span class="badge {% if client.no_show_warnings >= 2 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                    {{ client.no_show_warnings }} Warnings
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="javascript:void(0);" class="toggle-btn" onclick="toggleVisibility('extra-watchlist', this)">
+                        View All Clients ({{ clients_with_warnings|length }})
+                    </a>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted small text-center py-3">No clients currently on watchlist.</p>
+                {% endif %}
+            </div>
+
+            <h5 class="section-title-alt"><i class="bi bi-graph-up me-2"></i>Performance</h5>
+            <div class="bg-white shadow-sm rounded p-3 mb-4">
+                {% for service_name, data in service_performance.items|slice:":5" %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>{{ service_name }}</span>
+                        <span class="fw-bold">{{ data.completion_rate }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar" style="width: {{ data.completion_rate }}%; background-color: var(--brand-primary);"></div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% if service_performance.items|length > 5 %}
+                <div id="extra-performance" class="extra-content">
+                    {% for service_name, data in service_performance.items|slice:"5:" %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>{{ service_name }}</span>
+                            <span class="fw-bold">{{ data.completion_rate }}%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" style="width: {{ data.completion_rate }}%; background-color: var(--brand-primary);"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="javascript:void(0);" class="toggle-btn" onclick="toggleVisibility('extra-performance', this)">
+                    View All Services
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="section-title-alt mb-0"><i class="bi bi-clock-history me-2"></i>Service Log</h5>
+                <div class="btn-group filter-buttons">
+                    <a href="?status=all" class="btn btn-sm btn-outline-secondary ajax-filter {% if current_filter == 'all' %}active{% endif %}" data-status="all">All</a>
+                    <a href="?status=completed" class="btn btn-sm btn-outline-secondary ajax-filter {% if current_filter == 'completed' %}active{% endif %}" data-status="completed">Done</a>
+                    <a href="?status=no_show" class="btn btn-sm btn-outline-secondary ajax-filter {% if current_filter == 'no_show' %}active{% endif %}" data-status="no_show">No-Shows</a>
+                </div>
+            </div>
+
+            <div class="search-box mb-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search client name or service type..." style="border-color: var(--brand-accent);">
+            </div>
+
+            <div id="service-log-container">
+                <div class="history-list" id="historyList">
+                    {% for history in service_history %}
+                    <div class="history-item bg-white shadow-sm rounded p-3 mb-3" 
+                         data-client="{{ history.client.get_full_name }}" 
+                         data-service="{{ history.service.name }}">
+                        <div class="row align-items-center">
+                            <div class="col-md-5">
+                                <h6 class="mb-1 fw-bold" style="color: var(--brand-primary);">{{ history.service.name }}</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span>{{ history.client.get_full_name }}</span>
+                                    {% if history.client.no_show_warnings >= 2 %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger" style="font-size: 0.65rem;">HIGH RISK</span>
+                                    {% endif %}
+                                </div>
+                                {% if history.booking_created_at %}
+                                <div class="timestamp-info mt-1">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar-plus"></i> 
+                                        Booked: {{ history.booking_created_at|date:"M d, Y" }} at {{ history.booking_created_at|time:"g:i A" }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 text-muted small">
+                                <div><i class="bi bi-calendar3 me-2"></i>{{ history.start_time|date:"M d, Y" }}</div>
+                                <div><i class="bi bi-clock me-2"></i>{{ history.start_time|time:"g:i A" }}</div>
+                                {% if history.status_changed_at %}
+                                <div class="status-timestamp mt-1">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock-history"></i> 
+                                        {{ history.status_action }}: {{ history.status_changed_at|date:"M d, Y" }} at {{ history.status_changed_at|time:"g:i A" }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <span class="fw-bold d-block">₱{{ history.service.price }}</span>
+                                <span class="badge {% if history.status == 'completed' %}bg-success-subtle text-success{% elif history.status == 'no_show' %}bg-warning-subtle text-warning{% else %}bg-danger-subtle text-danger{% endif %}">
+                                    {{ history.status|title }}
+                                </span>
+                                {% if history.status == 'cancelled' and history.appointment and history.appointment.id %}
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-warning" onclick="restoreAppointment( history.appointment.id )">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-x display-4 text-muted"></i>
+                        <p class="mt-3">No matching service records found.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const leftSidebar = document.getElementById('artistSidebar');
+    const leftToggle = document.getElementById('leftSidebarToggle');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isMobile = () => window.innerWidth < 992;
+
+    if (leftSidebar && leftToggle) {
+        // Sync button visibility whenever sidebar class changes (from any source)
+        const observer = new MutationObserver(function() {
+            if (!isMobile()) return;
+            leftToggle.style.display = leftSidebar.classList.contains('collapsed') ? '' : 'none';
+        });
+        observer.observe(leftSidebar, { attributes: true, attributeFilter: ['class'] });
+
+        leftToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!isMobile() || !leftSidebar) return;
+            if (leftSidebar.classList.contains('collapsed')) {
+                leftSidebar.classList.remove('collapsed');
+                leftToggle.style.display = 'none';
+                if (overlay) overlay.classList.add('show');
+            } else {
+                leftSidebar.classList.add('collapsed');
+                leftToggle.style.display = '';
+                if (overlay) overlay.classList.remove('show');
+            }
+        });
+    }
+
+    // Close sidebar when overlay is clicked (mobile)
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            if (!isMobile() || !leftSidebar) return;
+            leftSidebar.classList.add('collapsed');
+            overlay.classList.remove('show');
+            if (leftToggle) leftToggle.style.display = '';
+            document.body.style.overflow = '';
+        });
+    }
+
+    // Handle resize between mobile <-> desktop
+    window.addEventListener('resize', function() {
+        if (!isMobile()) {
+            // Going to desktop: show sidebar, clean up mobile artifacts
+            if (overlay) overlay.classList.remove('show');
+            if (leftToggle) leftToggle.style.display = '';
+            if (leftSidebar) leftSidebar.classList.remove('collapsed');
+            document.body.style.overflow = '';
+        } else {
+            // Going to mobile: collapse sidebar so it doesn't auto-show
+            if (leftSidebar && !leftSidebar.classList.contains('collapsed')) {
+                leftSidebar.classList.add('collapsed');
+            }
+            if (overlay) overlay.classList.remove('show');
+            if (leftToggle) leftToggle.style.display = '';
+            document.body.style.overflow = '';
+        }
+    });
+});
+</script>
+<script src="{% static 'js/artist_history.js' %}"></script>
+
+<!-- Enhanced Dynamic Time Slot Generation -->
+<script>
+// Dynamically generate hourly slots for any container
+function generateHourlySlots(containerId, slotName = 'time_slot') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    for (let hour = 10; hour <= 20; hour++) {
+        const timeStr = hour.toString().padStart(2, '0') + ':00';
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = slotName;
+        radio.value = timeStr;
+        radio.id = slotName + '_' + timeStr.replace(':', '');
+        radio.className = 'form-check-input';
+
+        const label = document.createElement('label');
+        label.htmlFor = radio.id;
+        label.className = 'form-check-label';
+        label.textContent = timeStr;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-check mb-2';
+        wrapper.appendChild(radio);
+        wrapper.appendChild(label);
+
+        container.appendChild(wrapper);
+    }
+}
+
+// Example usage: generate slots for a modal
+// generateHourlySlots('rescheduleSlotContainer');
+
+function restoreAppointment(appointmentId) {
+    if (!confirm('Are you sure you want to restore this cancelled appointment back to the Waiting queue?')) return;
+
+    fetch(`/artist/appointment/${appointmentId}/override/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : getCookie('csrftoken')
+        },
+        body: new URLSearchParams({ target_status: 'Waiting' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Appointment restored successfully!');
+            location.reload();
+        } else {
+            alert('Failed to restore appointment: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while restoring the appointment.');
+    });
+}
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

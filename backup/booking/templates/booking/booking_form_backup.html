@@ -1,0 +1,897 @@
+{% extends 'booking/client_base.html' %}
+{% load static %}
+{% block title %}Book Your Nail Appointment - Polish Palette{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Force all gallery items to be visible in booking form */
+    .booking-container .gallery-item,
+    .reference-section .gallery-item {
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    /* Override any pagination styles */
+    .booking-container #galleryGrid .gallery-item,
+    .reference-section #galleryGrid .gallery-item {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .booking-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .service-category {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-category::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6b6b, #51cf66);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .service-category:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: #ff6b6b;
+    }
+
+    .service-category:hover::before {
+        transform: scaleX(1);
+    }
+
+    .service-category.selected {
+        border-color: #ff6b6b;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.2);
+    }
+
+    .service-category.selected::before {
+        transform: scaleX(1);
+    }
+
+    .service-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .service-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .service-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    .service-description {
+        color: #6c757d;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .service-time {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #ff6b6b;
+        font-weight: 500;
+    }
+
+    .complexity-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .complexity-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .complexity-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .complexity-option {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .complexity-option:hover {
+        border-color: #ff6b6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+    }
+
+    .complexity-option.selected {
+        border-color: #ff6b6b;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+    }
+
+    .complexity-name {
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 0.5rem;
+    }
+
+    .complexity-desc {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .complexity-price {
+        color: #ff6b6b;
+        font-weight: 600;
+    }
+
+    .tip-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+        display: none;
+    }
+
+    .tip-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .tip-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .tip-option {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .tip-option:hover {
+        border-color: #ff6b6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+    }
+
+    .tip-option.selected {
+        border-color: #ff6b6b;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+    }
+
+    .tip-shape {
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 0.25rem;
+    }
+
+    .tip-code {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+
+    .reference-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .reference-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .reference-options {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .reference-option {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 150px;
+        text-align: center;
+    }
+
+    .reference-option:hover {
+        border-color: #ff6b6b;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+    }
+
+    .reference-option.selected {
+        border-color: #ff6b6b;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+    }
+
+    .reference-content {
+        margin-top: 1.5rem;
+    }
+
+    .file-upload {
+        border: 2px dashed #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .file-upload:hover {
+        border-color: #ff6b6b;
+        background: #fff5f5;
+    }
+
+    .file-upload input[type="file"] {
+        display: none;
+    }
+
+    .upload-label {
+        cursor: pointer;
+        color: #6c757d;
+    }
+
+    .upload-label:hover {
+        color: #ff6b6b;
+    }
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        grid-auto-rows: auto;
+        /* Removed max-height and overflow so all designs show and the page scrolls naturally */
+        padding-right: 10px;
+    }
+
+    /* Custom Scrollbar for the Gallery */
+    .gallery-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .gallery-grid::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .gallery-grid::-webkit-scrollbar-thumb {
+        background: var(--red-violet); /* Your brand color */
+        border-radius: 10px;
+    }
+
+    .gallery-grid::-webkit-scrollbar-thumb:hover {
+        background: #641e2b; /* Darker shade on hover */
+    }  
+
+    .gallery-item {
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .gallery-item:hover {
+        transform: scale(1.05);
+        border-color: #ff6b6b;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);
+    }
+
+    .gallery-item.selected {
+        border-color: #ff6b6b;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .datetime-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .datetime-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        color: #2d3436;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+    }
+
+    .summary-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    }
+
+    .summary-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #ff5252 0%, #ff6b6b 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.25);
+    }
+
+    .btn-secondary {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 2px solid #e9ecef;
+    }
+
+    .btn-secondary:hover {
+        background: #e9ecef;
+        color: #495057;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .booking-container {
+            padding: 1rem;
+        }
+
+        .datetime-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .reference-options {
+            flex-direction: column;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="booking-container">
+    <h1 class="text-center fw-bold mb-4" style="color: var(--bistre-brown);">Build Your Custom Set</h1>
+    
+    <form method="POST" enctype="multipart/form-data" id="bookingForm">
+        {% csrf_token %}
+        
+        <!-- Phase 1: Service Category Selection -->
+        <div class="service-section">
+            <h2 style="color: var(--olive-drab); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; border-top: 2px dashed #e9ecef; padding-top: 1rem;">Phase 1: Structure Selection</h2>
+            
+            <div class="service-category" data-category="gel_polish">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="bi bi-droplet-half"></i>
+                    </div>
+                    <h3 class="service-title">Gel Polish</h3>
+                </div>
+                <p class="service-description">Natural nail overlay service. Perfect for maintaining healthy natural nails with long-lasting color and shine.</p>
+                <div class="service-time">
+                    <i class="bi bi-clock"></i>
+                    <span>40 minutes active + 20 minutes sanitation</span>
+                </div>
+            </div>
+
+            <div class="service-category" data-category="soft_gel_extensions">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <h3 class="service-title">Soft-Gel Extensions</h3>
+                </div>
+                <p class="service-description">Tip application + overlay service. Ideal for adding length and strength to your natural nails.</p>
+                <div class="service-time">
+                    <i class="bi bi-clock"></i>
+                    <span>40 minutes active + 20 minutes sanitation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 1: Complexity Selection -->
+        <div class="complexity-section">
+            <h2 class="complexity-title">Complexity Level</h2>
+            
+            <div class="complexity-options">
+                <div class="complexity-option" data-complexity="plain" data-price="0">
+                    <div class="complexity-name">Plain</div>
+                    <div class="complexity-desc">1-2 Base Colors only</div>
+                    <div class="complexity-price">₱0</div>
+                </div>
+                
+                <div class="complexity-option" data-complexity="minimal" data-price="250">
+                    <div class="complexity-name">Minimal</div>
+                    <div class="complexity-desc">Simple line art + chrome</div>
+                    <div class="complexity-price">₱250</div>
+                </div>
+                
+                <div class="complexity-option" data-complexity="full" data-price="650">
+                    <div class="complexity-name">Full</div>
+                    <div class="complexity-desc">Line art, chromes, rhinestones, charms, 3D Art</div>
+                    <div class="complexity-price">₱650</div>
+                </div>
+                
+                <div class="complexity-option" data-complexity="advanced" data-price="1200">
+                    <div class="complexity-name">Advanced</div>
+                    <div class="complexity-desc">High-complexity intricate details, hand-painted</div>
+                    <div class="complexity-price">₱1200</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 2: Tip Customization (Soft-Gel Extensions Only) -->
+        <div class="tip-section hidden" id="tipSection" style="padding: 1.5rem; background: #fff; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 2rem;">
+            <h2 style="color: var(--olive-drab); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Phase 2: Tip Customization (Soft-Gel Only)</h2>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1.5rem;">Choose one shape-length combination.</p>
+            
+            <div class="tip-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <!-- Row 1: Long Coffin, Medium Square, Medium Coffin -->
+                <div class="tip-option" data-tip="PGT01" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT01</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Coffin</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Long</div>
+                </div>
+                
+                <div class="tip-option" data-tip="PGT02" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT02</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Square</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Medium</div>
+                </div>
+                
+                <div class="tip-option" data-tip="PGT03" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT03</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Coffin</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Medium</div>
+                </div>
+                
+                <!-- Row 2: Medium Stiletto, Medium Almond, Short Square -->
+                <div class="tip-option" data-tip="PGT04" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT04</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Stiletto</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Medium</div>
+                </div>
+                
+                <div class="tip-option" data-tip="PGT05" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT05</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Almond</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Medium</div>
+                </div>
+                
+                <div class="tip-option" data-tip="PGT06" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT06</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Square</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Short</div>
+                </div>
+                
+                <!-- Row 3: Short Coffin, Short Stiletto, Short Almond -->
+                <div class="tip-option" data-tip="PGT07" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT07</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Coffin</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Short</div>
+                </div>
+                
+                <div class="tip-option" data-tip="PGT08" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT08</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Stiletto</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Short</div>
+                </div>
+
+                <div class="tip-option" data-tip="PGT09" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div class="tip-code" style="color: #adb5bd; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PGT09</div>
+                    <div class="tip-shape" style="color: var(--olive-drab); font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Almond</div>
+                    <div class="tip-length" style="color: #6c757d; font-size: 0.85rem;">Short</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 3: Visual Reference Logic -->
+        <div class="reference-section hidden" id="referenceSection" style="padding: 1.5rem; background: #fff; border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 2rem;">
+            <h2 style="color: var(--olive-drab); font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem;">Phase 3: Inspiration Source</h2>
+            
+            <div class="reference-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                <!-- Yes Option -->
+                <div class="reference-option" data-reference="upload" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #2d3436; font-weight: 600;">
+                        <input type="radio" name="ref_choice" id="refYes" style="accent-color: var(--red-violet); transform: scale(1.2);">
+                        <label for="refYes" style="cursor: pointer;">Yes - I have my own reference</label>
+                    </div>
+                </div>
+                
+                <!-- No Option -->
+                <div class="reference-option" data-reference="gallery" style="border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: #2d3436; font-weight: 600;">
+                        <input type="radio" name="ref_choice" id="refNo" style="accent-color: var(--red-violet); transform: scale(1.2);">
+                        <label for="refNo" style="cursor: pointer;">No - I will pick from artist gallery</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reference-content hidden" id="uploadSection">
+                <div class="file-upload" style="border: 2px dashed #adb5bd; border-radius: 8px; padding: 2rem; text-align: center;">
+                    <input type="file" id="referenceFile" name="reference_file" accept="image/*">
+                    <label for="referenceFile" class="upload-label" style="cursor: pointer; color: #6c757d;">
+                        <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: var(--red-violet); margin-bottom: 0.5rem;"></i>
+                        <p style="margin-bottom: 0; font-weight: 500;">Click to upload your design reference</p>
+                        <small style="font-size: 0.8rem;">Maximum file size: 2MB. Image formats only.</small>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="reference-content hidden" id="gallerySection">
+                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">Pick one inspiration from the artist portfolio.</p>
+                <div class="gallery-grid" id="galleryGrid">
+                    {% for design in gallery_designs %}
+                        
+                        {% if design.image %}
+                        <div class="gallery-item" data-image-id="{{ design.id }}">
+                            <img src="{{ design.image.url }}" alt="{{ design.title }}"> 
+                        </div>
+                        
+                        {% elif design.image_url %}
+                        <div class="gallery-item" data-image-id="{{ design.id }}">
+                            <img src="{{ design.image_url }}" alt="{{ design.title }}"> 
+                        </div>
+                        {% endif %}
+
+                    {% empty %}
+                    <p style="color: #adb5bd; font-style: italic; grid-column: 1 / -1; text-align: center;">No gallery designs available yet.</p>
+                    {% endfor %}
+                </div>
+                <!-- Gallery debug and temporary overrides removed -->
+            </div>
+
+            <!-- Design Note always shows when either option is chosen -->
+            <div class="design-note-section hidden" id="designNoteSection" style="margin-top: 2rem;">
+                <label for="designNote" style="font-weight: 600; color: #495057; display: block; margin-bottom: 0.5rem; font-size: 0.95rem;">Design Note (optional)</label>
+                <textarea id="designNote" name="custom_art_description" rows="4" style="width: 100%; border: 1px solid #ced4da; border-radius: 6px; padding: 0.75rem; font-size: 0.95rem; resize: vertical;" placeholder="Add details for the artist..."></textarea>
+            </div>
+        </div>
+            
+
+        </div>
+
+        <!-- Date & Time Selection -->
+        <div class="datetime-section hidden" id="datetimeSection">
+            <h3 class="datetime-title">Select Date & Time</h3>
+            
+            <div class="datetime-grid">
+                <div class="form-group">
+                    <label for="appointment_date">Appointment Date</label>
+                    <input type="date" name="appointment_date" id="appointment_date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="appointment_time">Appointment Time</label>
+                    <select name="appointment_time" id="appointment_time" required>
+                        <option value="">Select a time</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                        <option value="18:00">6:00 PM</option>
+                        <option value="19:00">7:00 PM</option>
+                        <option value="20:00">8:00 PM</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Artist Selection -->
+        <div class="datetime-section hidden" id="artistSection">
+            <h3 class="datetime-title">Choose Your Artist</h3>
+            
+            <div class="form-group">
+                <label for="artist">Preferred Artist</label>
+                <select name="artist" id="artist" required>
+                    <option value="">Select an artist</option>
+                    {% for artist in artists %}
+                    <option value="{{ artist.id }}">{{ artist.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Booking Summary -->
+        <div class="summary-section hidden" id="summarySection">
+            <h3 class="summary-title">Booking Summary</h3>
+            
+            <div class="summary-item">
+                <span>Service Category:</span>
+                <span id="summaryCategory">-</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Complexity Level:</span>
+                <span id="summaryComplexity">-</span>
+            </div>
+            
+            <div class="summary-item hidden" id="summaryTipRow">
+                <span>Nail Shape/Length:</span>
+                <span id="summaryTip">-</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Reference Type:</span>
+                <span id="summaryReference">-</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Appointment Date:</span>
+                <span id="summaryDate">-</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Appointment Time:</span>
+                <span id="summaryTime">-</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Artist:</span>
+                <span id="summaryArtist">-</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Total Duration:</span>
+                <span>60 minutes (40 + 20 buffer)</span>
+            </div>
+            
+            <div class="summary-item">
+                <span>Total Price:</span>
+                <span id="summaryPrice">₱0</span>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions hidden" id="formActions">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Cancel
+            </a>
+            
+            <!-- 48-Hour Acknowledgement -->
+            <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="acknowledge48Hour" required>
+                <label class="form-check-label" for="acknowledge48Hour">
+                    <strong>[X]</strong> I acknowledge that I can only Re-Schedule or Cancel my appointment up to 2 days (48 hours) before the start time.
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                <i class="bi bi-check-circle"></i>
+                Book Appointment
+            </button>
+            
+            <!-- Debug Button -->
+            <button type="button" class="btn btn-secondary btn-sm" onclick="console.log('Current state:', bookingSystem.bookingState); bookingSystem.validateForm();">
+                Debug Form
+            </button>
+        </div>
+
+        <!-- Hidden Fields -->
+        <input type="hidden" name="service_category" id="serviceCategory" value="">
+        <input type="hidden" name="complexity_level" id="complexityLevel" value="">
+        <input type="hidden" name="tip_code" id="tipCode" value="">
+        <input type="hidden" name="reference_type" id="referenceType" value="">
+        <input type="hidden" name="gallery_image_id" id="galleryImageId" value="">
+        <input type="hidden" name="total_price" id="totalPrice" value="0">
+    </form>
+</div>
+
+<script src="{% static 'js/dynamic_booking.js' %}"></script>
+
+<!-- Fix for gallery pagination issue - ensure all items are visible -->
+<script>
+console.log('Booking form gallery fix script loaded');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, checking gallery...');
+    
+    // Ensure all gallery items in the booking form are visible
+    const bookingGalleryGrid = document.getElementById('galleryGrid');
+    console.log('bookingGalleryGrid found:', !!bookingGalleryGrid);
+
+    if (bookingGalleryGrid) {
+        // Check if we're in the booking form context
+        const isInBookingForm = bookingGalleryGrid.closest('.booking-container') || 
+                               document.querySelector('.reference-section');
+        console.log('isInBookingForm:', isInBookingForm);
+
+        if (isInBookingForm) {
+            // Force all gallery items to be visible
+            const galleryItems = bookingGalleryGrid.querySelectorAll('.gallery-item');
+            console.log('Number of gallery items found:', galleryItems.length);
+            
+            galleryItems.forEach((item, index) => {
+                console.log(`Item ${index}: current display =`, item.style.display);
+                item.style.display = 'block';
+                item.style.visibility = 'visible';
+                console.log(`Item ${index}: set to display =`, item.style.display);
+            });
+            
+            console.log(`Showing all ${galleryItems.length} gallery items in booking form`);
+        } else {
+            console.log('Not in booking form context, skipping gallery override.');
+        }
+    } else {
+        console.log('galleryGrid element not found in booking_form.html.');
+    }
+});
+
+// Also try a more aggressive approach - run immediately
+console.log('Running immediate gallery fix...');
+const immediateGrid = document.getElementById('galleryGrid');
+if (immediateGrid) {
+    const items = immediateGrid.querySelectorAll('.gallery-item');
+    console.log('Immediate fix: found', items.length, 'items');
+    items.forEach(item => {
+        item.style.display = 'block !important';
+        item.style.visibility = 'visible';
+    });
+}
+</script>
+{% endblock %}

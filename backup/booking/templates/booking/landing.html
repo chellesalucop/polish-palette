@@ -1,0 +1,169 @@
+{% extends "booking/base.html" %}
+{% load static %}
+
+{% block title %}Landing Page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section id="home" class="hero">
+    <div class="hero-overlay">
+        <div class="hero-content container">
+            <h1 class="display-4 fw-bold">Beautiful Nails, Perfect Style</h1>
+            <p class="lead">
+                Beauty begins at your fingertips.
+                Experience luxury nail artistry designed to elevate your style,
+                boost your confidence, and bring out your inner glow.
+            </p>
+            <a href="{% url 'login' %}" class="btn mt-3">Book Now</a>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICE SECTION -->
+<section id="services" class="service-section">
+    <div class="container">
+        <h2 class="service-title">Our Services</h2>
+        
+        <div class="service-grid">
+            <!-- 3 Cards for Services -->
+            <div class="service-card">
+                <img src="{% static 'images/services/cardGelpolish.jpg' %}" alt="Service" class="service-card-image">
+                <div class="service-circle">
+                    <img src="{% static 'images/services/logoGel.png' %}" alt="Service Detail" class="circle-image">
+                </div>
+                <div class="service-info">
+                    <div class="service-title-text">Gel Polish</div>
+                    <div class="service-description">
+                        Long-lasting gel polish applied on natural nails to provide a smooth, glossy finish. 
+                        This service includes different design options ranging from simple colors to detailed nail art.
+                    </div>
+                </div>
+                <div class="service-line"></div>
+                <div class="service-footer">
+                    <a href="#" class="view-more-link" data-modal="modalManicure">View More</a>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="{% static 'images/services/cardExtension.jpg' %}" alt="Service" class="service-card-image">
+                <div class="service-circle">
+                    <img src="{% static 'images/services/logoNailextent.png' %}" alt="Service Detail" class="circle-image">
+                </div>
+                <div class="service-info">
+                    <div class="service-title-text">Soft Gel Extensions</div>
+                    <div class="service-description">
+                        Pre-shaped soft gel nail tips that add length and durability to your nails. Perfect for clients who want longer nails with customizable designs and styles.
+                    </div>
+                </div>
+                <div class="service-line"></div>
+                <div class="service-footer">
+                    <a href="#" class="view-more-link" data-modal="modalGel">View More</a>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <img src="{% static 'images/services/cardRemoval.jpg' %}" alt="Service" class="service-card-image">
+                <div class="service-circle">
+                    <img src="{% static 'images/services/logoRepair.png' %}" alt="Service Detail" class="circle-image">
+                </div>
+                <div class="service-info">
+                    <div class="service-title-text">Removal</div>
+                    <div class="service-description">
+                         Safe and professional removal of gel polish or nail extensions to protect the natural nails and keep them healthy.
+                    </div>
+                </div>
+                <div class="service-line"></div>
+                <div class="service-footer">
+                    <a href="#" class="view-more-link" data-modal="modalExtensions">View More</a>
+                </div>
+            </div>
+</section>
+
+<!-- GALLERY SECTION -->
+<section id="gallery" class="gallery-section">
+    <div class="container">
+
+        <h2 class="gallery-title">Artist Gallery</h2>
+
+        <div class="gallery-wrapper">
+            <div class="gallery-grid" id="galleryGrid">
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails1.png' %}" alt="">
+                    <div class="gallery-caption">Matcha Pearl Elegance</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails2.png' %}" alt="">
+                    <div class="gallery-caption">Sea Prism Dominos</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails3.png' %}" alt="">
+                    <div class="gallery-caption">Ruby Rose Quartet</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails4.png' %}" alt="">
+                    <div class="gallery-caption">Vintage Glamour Spark</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails5.png' %}" alt="">
+                    <div class="gallery-caption">Retro Summer Calling</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails6.png' %}" alt="">
+                    <div class="gallery-caption">Fairy Fanatic Space</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails7.png' %}" alt="">
+                    <div class="gallery-caption">Maidens Flower Garden</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails8.png' %}" alt="">
+                    <div class="gallery-caption">Polka Fluff Shells</div>
+                </div>
+
+                <div class="gallery-item">
+                    <img src="{% static 'images/gallery/nails9.png' %}" alt="">
+                    <div class="gallery-caption">Ruby Red Elegance</div>
+                </div>
+
+            </div>
+
+            <div class="gallery-controls">
+                <button id="prevBtn" class="gallery-btn prev-btn">‹</button>
+                <button id="nextBtn" class="gallery-btn next-btn">›</button>
+            </div>
+            
+            <div class="gallery-indicators" id="galleryIndicators"></div>
+        </div>
+    </div>
+</section>
+
+<!-- GALLERY MODAL -->
+<div id="galleryModal" class="gallery-modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div class="modal-image-container">
+            <img id="modalImage" src="" alt="Gallery Image">
+        </div>
+        <div class="modal-controls">
+            <button class="modal-btn modal-prev">‹</button>
+            <div class="modal-indicator">
+                <span id="currentImageNum">1</span> / <span id="totalImages">9</span>
+            </div>
+            <button class="modal-btn modal-next">›</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

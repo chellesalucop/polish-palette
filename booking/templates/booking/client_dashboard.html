@@ -1,0 +1,382 @@
+{% extends "booking/client_base.html" %}
+{% load static %}
+
+{% block title %}Client Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/clientDashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-hero">
+    <div class="dashboard-hero-overlay">
+        <div class="dashboard-hero-content">
+            <h1 class="dashboard-title">Welcome back, {{ user.first_name }}! ✨</h1>
+            <p class="dashboard-subtitle">Ready for your next glow-up?</p>
+            
+            <div class="hero-stats">
+                <div class="stat-badge">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>{{ total_appointments|default:0 }} Total Appointments</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+<div class="dashboard-content">
+    <div class="container">
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show dashboard-alert" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="dashboard-main-grid">
+            
+            <div class="upcoming-column">
+                <h2 class="section-title">Next Up</h2>
+                {% if upcoming_appointment %}
+                    <div class="appointment-card highlight-card">
+                        <div class="appointment-header">
+                            <div class="appointment-service">
+                                <h3>{{ upcoming_appointment.service.name }}</h3>
+                                <div class="appointment-artist">
+                                    <i class="bi bi-person-circle"></i>
+                                    {{ upcoming_appointment.artist.user.get_full_name }}
+                                </div>
+                            </div>
+                            <div class="appointment-datetime">
+                                <div class="appointment-date">
+                                    <i class="bi bi-calendar3"></i>
+                                    {{ upcoming_appointment.date|date:"M d, Y" }}
+                                </div>
+                                <div class="appointment-time">
+                                    <i class="bi bi-clock"></i>
+                                    {{ upcoming_appointment.time|time:"g:i A" }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="appointment-body">
+                            <div class="appointment-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Duration:</span>
+                                    <span class="detail-value">{{ upcoming_appointment.service.duration }} mins</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Price:</span>
+                                    <span class="detail-value price">₱{{ upcoming_appointment.service.price }}</span>
+                                </div>
+                            </div>
+                            <div class="appointment-status mt-3">
+                                {% if upcoming_appointment.status == 'Waiting' %}
+                                    <span class="status-badge waiting-badge">Waiting</span>
+                                {% elif upcoming_appointment.status == 'Approved' %}
+                                    <span class="status-badge approved-badge">Approved</span>
+                                {% elif upcoming_appointment.status == 'On-going' %}
+                                    <span class="status-badge ongoing-badge">On-going</span>
+                                {% endif %}
+                            </div>
+                        <div class="appointment-actions">
+                            {% if upcoming_appointment.status == 'Waiting' %}
+                                {% if upcoming_appointment.is_within_48_hours %}
+                                <a href="mailto:{{ upcoming_appointment.artist.user.email }}"
+                                   class="appointment-btn reschedule-btn text-decoration-none text-center d-flex align-items-center justify-content-center" style="flex: 1;"
+                                   onclick="alert('Appointments cannot be rescheduled within 48 hours of the new date through the automated system to ensure artist preparation. For urgent last-minute changes, please contact the studio directly via the \'Contact Artist\' button.');">
+                                    <i class="bi bi-envelope me-2"></i> Contact Artist
+                                </a>
+                                {% else %}
+                                <form method="POST" action="{% url 'reschedule_appointment' upcoming_appointment.id %}" style="flex: 1;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="appointment-btn reschedule-btn" onclick="return confirm('Rescheduling Policy Warning:\n\n• You can only reschedule once per appointment without penalty.\n• Rescheduling less than 24 hours before your slot may result in a forfeited deposit.\n\nDo you want to proceed?');">
+                                        <i class="bi bi-arrow-clockwise"></i> Reschedule
+                                    </button>
+                                </form>
+                                {% endif %}
+                            {% elif upcoming_appointment.status == 'Approved' %}
+                                <a href="mailto:{{ upcoming_appointment.artist.user.email|default:upcoming_appointment.artist.email }}"
+                                   class="appointment-btn contact-btn" style="flex: 1;">
+                                    <i class="bi bi-envelope"></i> Contact
+                                </a>
+                            {% endif %}
+
+    {% if upcoming_appointment.status == 'Waiting' %}
+    <form method="POST" action="{% url 'cancel_appointment' upcoming_appointment.id %}" style="flex: 1;">
+        {% csrf_token %}
+        <button type="submit" class="appointment-btn cancel-btn" onclick="return confirm('Are you sure you want to cancel this appointment? This action cannot be undone.');">
+            <i class="bi bi-x-circle"></i> Cancel
+        </button>
+    </form>
+{% endif %}
+</div>
+                    </div>
+                {% else %}
+                    <div class="no-appointment">
+                        <div class="no-appointment-icon">
+                            <i class="bi bi-calendar-x"></i>
+                        </div>
+                        <h3 class="no-appointment-title">No upcoming appointments</h3>
+                        <p class="no-appointment-text">Your schedule is clear. Book a session to treat yourself!</p>
+                        <a href="{% url 'booking_create' %}" class="no-appointment-btn">Book Now</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="calendar-column">
+                <h2 class="section-title">Your Schedule</h2>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" id="prevMonth">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <h3 class="calendar-month-year" id="currentMonth"></h3>
+                        <button class="calendar-nav-btn" id="nextMonth">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <section class="quick-actions-section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="action-cards">
+                
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-calendar-plus"></i>
+                    </div>
+                    <h3 class="action-title">Book Service</h3>
+                    <p class="action-description">Schedule your next nail appointment</p>
+                    <a href="{% url 'booking_create' %}" class="action-btn primary-action">Book Now</a>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-calendar-week"></i>
+                    </div>
+                    <h3 class="action-title">View History</h3>
+                    <p class="action-description">See your upcoming and past appointments</p>
+                    <a href="{% url 'appointments_list' %}" class="action-btn secondary-action">View All</a>
+                </div>
+                
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <h3 class="action-title">Browse Menu</h3>
+                    <p class="action-description">Explore our full gallery of nail services</p>
+                    <a href="{% url 'services' %}" class="action-btn secondary-action">View Services</a>
+                </div>
+                
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<div class="appointment-modal" id="appointmentModal">
+    <div class="appointment-modal-content">
+        <div class="appointment-modal-header">
+            <h3 class="modal-title">Appointment Details</h3>
+            <button class="modal-close-btn" id="closeModal">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="appointment-modal-body">
+            <div class="modal-service-info">
+                <div class="modal-service-image">
+                    <img id="modalServiceImage" src="" alt="Service">
+                </div>
+                <div class="modal-service-details">
+                    <h4 id="modalServiceName"></h4>
+                    <p id="modalServiceDescription"></p>
+                    <div class="modal-service-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-clock"></i>
+                            <span id="modalDuration"></span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-tag"></i>
+                            <span id="modalCategory"></span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-currency-peso"></i>
+                            <span id="modalPrice"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-appointment-info">
+                <h5>Appointment Information</h5>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Date:</label>
+                        <span id="modalDate"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Time:</label>
+                        <span id="modalTime"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Artist:</label>
+                        <span id="modalArtist"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Status:</label>
+                        <span id="modalStatus" class="status-badge"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="appointment-modal-footer">
+            <button class="modal-btn secondary-btn" id="closeModalBtn">Close</button>
+        </div>
+        
+        <!-- File Upload Section -->
+        <div class="upload-column">
+            <h2 class="section-title">Upload Files</h2>
+            <div class="upload-card">
+                <form method="post" action="{% url 'client_file_upload' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="file" class="form-label">Choose File:</label>
+                        <input type="file" name="file" id="file" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="file_type" class="form-label">File Type:</label>
+                        <select name="file_type" id="file_type" class="form-control">
+                            <option value="payment_receipt">Payment Receipt</option>
+                            <option value="design_reference">Design Reference</option>
+                            <option value="nail_art">Nail Art</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reference_code" class="form-label">Reference Code (Optional):</label>
+                        <input type="text" name="reference_code" id="reference_code" class="form-control" placeholder="Enter reference code if applicable">
+                    </div>
+                    <button type="submit" class="upload-btn">
+                        <i class="bi bi-cloud-upload"></i> Upload File
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Calendar functionality
+let currentDate = new Date();
+let currentMonth = currentDate.getMonth();
+let currentYear = currentDate.getFullYear();
+
+// Note: Ensure your views.py is passing the parsed JSON safely
+const appointmentsData = JSON.parse('{{ appointments|escapejs }}');
+
+function renderCalendar() {
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    document.getElementById('currentMonth').textContent = monthNames[currentMonth] + ' ' + currentYear;
+    
+    let html = '';
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+        html += '<div class="calendar-day-header">' + day + '</div>';
+    });
+    
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div class="calendar-day other-month"></div>';
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+        const hasAppointment = appointmentsData.some(apt => 
+            apt.date && new Date(apt.date).toISOString().split('T')[0] === dateStr
+        );
+        
+        const isToday = currentDate.getDate() === day && 
+                       currentDate.getMonth() === currentMonth && 
+                       currentDate.getFullYear() === currentYear;
+        
+        let className = 'calendar-day';
+        if (hasAppointment) className += ' has-appointment';
+        if (isToday) className += ' today';
+        
+        html += '<div class="' + className + '" data-date="' + dateStr + '">' + day + '</div>';
+    }
+    
+    document.getElementById('calendarGrid').innerHTML = html;
+    
+    document.querySelectorAll('.calendar-day.has-appointment').forEach(day => {
+        day.addEventListener('click', function() {
+            const date = this.dataset.date;
+            const dayAppointments = appointmentsData.filter(apt => 
+                apt.date && new Date(apt.date).toISOString().split('T')[0] === date
+            );
+            if (dayAppointments.length > 0) {
+                showAppointmentModal(dayAppointments[0]);
+            }
+        });
+    });
+}
+
+function showAppointmentModal(appointment) {
+    document.getElementById('modalServiceImage').src = appointment.image_url || '{% static "images/services/default-service.jpg" %}';
+    document.getElementById('modalServiceName').textContent = appointment.service_name;
+    document.getElementById('modalServiceDescription').textContent = appointment.description;
+    document.getElementById('modalDuration').textContent = appointment.duration + ' mins';
+    document.getElementById('modalCategory').textContent = appointment.category;
+    document.getElementById('modalPrice').textContent = '₱' + appointment.price;
+    document.getElementById('modalDate').textContent = new Date(appointment.date).toLocaleDateString('en-US', { 
+        month: 'long', day: 'numeric', year: 'numeric' 
+    });
+    document.getElementById('modalTime').textContent = appointment.time;
+    document.getElementById('modalArtist').textContent = appointment.artist_name;
+    
+    const statusElement = document.getElementById('modalStatus');
+    statusElement.textContent = appointment.status;
+    statusElement.className = 'status-badge ' + appointment.status.toLowerCase() + '-badge';
+    
+    document.getElementById('appointmentModal').classList.add('active');
+}
+
+document.getElementById('prevMonth').addEventListener('click', function() {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar();
+});
+
+document.getElementById('nextMonth').addEventListener('click', function() {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar();
+});
+
+const closeModalFunc = () => document.getElementById('appointmentModal').classList.remove('active');
+document.getElementById('closeModal').addEventListener('click', closeModalFunc);
+document.getElementById('closeModalBtn').addEventListener('click', closeModalFunc);
+document.getElementById('appointmentModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModalFunc();
+});
+
+// Initialize
+renderCalendar();
+</script>
+{% endblock %}
+{% endblock %}

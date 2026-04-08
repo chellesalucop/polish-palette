@@ -1,0 +1,54 @@
+{% for appointment in appointments %}
+    <div class="appointment-card p-3 mb-3 border-start border-primary" data-status="{{ appointment.status }}">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <span class="fw-bold text-primary">{{ appointment.client.get_full_name }}</span>
+                <span class="badge bg-secondary ms-2">{{ appointment.time|time:"g:i A" }}</span>
+                {% if appointment.status == 'Approved' %}
+                    <span class="badge bg-primary ms-2">Confirmed</span>
+                {% elif appointment.status == 'On-going' %}
+                    <span class="badge bg-warning ms-2">In Progress</span>
+                {% elif appointment.status == 'Completed' %}
+                    <span class="badge bg-success ms-2">Completed</span>
+                {% elif appointment.status == 'Cancelled' %}
+                    <span class="badge bg-danger ms-2">Cancelled</span>
+                {% else %}
+                    <span class="badge bg-secondary ms-2">{{ appointment.status }}</span>
+                {% endif %}
+            </div>
+            <div class="ms-auto">
+                <small class="text-muted">Service: {{ appointment.service.name }}</small>
+                {% if appointment.notes %}
+                    <div class="mt-2">
+                        <small class="text-muted">Notes: {{ appointment.notes }}</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if appointment.status == 'Approved' %}
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary btn-sm" onclick="commandCenter.startSession({{ appointment.id }})">
+                    <i class="bi bi-play-circle me-1"></i>
+                    Start Session
+                </button>
+                <button class="btn btn-outline-warning btn-sm" onclick="commandCenter.initiateReschedule({{ appointment.id }})">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    Reschedule
+                </button>
+            </div>
+        {% elif appointment.status == 'On-going' %}
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-success btn-sm" onclick="commandCenter.finishSession({{ appointment.id }})">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Finish & Sanitize
+                </button>
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="text-center py-5">
+        <i class="bi bi-calendar-x display-4"></i>
+        <p class="mb-0 mt-2">No appointments scheduled for {{ selected_date }}.</p>
+    </div>
+{% endfor %}
