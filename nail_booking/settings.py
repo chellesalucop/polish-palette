@@ -67,6 +67,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'anymail',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -234,6 +236,23 @@ ANYMAIL = {
     'BREVO_API_KEY': os.environ.get('BREVO_API_KEY'),
 }
 DEFAULT_FROM_EMAIL = os.environ.get('BREVO_SENDER_EMAIL')
+
+# Cloudinary Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# Default Cloudinary folder for Polish Palette
+CLOUDINARY_DEFAULT_FOLDER = 'Polish Palette'
+
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Use Cloudinary for media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Login/Logout URLs
 LOGIN_URL = 'login'

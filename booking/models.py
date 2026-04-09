@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.hashers import make_password, check_password
+from cloudinary.models import CloudinaryField
 from .utils.contact_validation import ContactNumberValidator
 from .utils.email_validation import EmailValidator
 from .utils.username_validation import UsernameValidator
@@ -172,7 +173,7 @@ class Client(AbstractBaseUser, PermissionsMixin):
     
     # From Unfinished Code (KEEP THESE)
     username = models.CharField(max_length=150, unique=True, null=True, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    profile_picture = CloudinaryField('profile_pics', folder='Polish Palette/profile_pics/', null=True, blank=True)
     no_show_warnings = models.IntegerField(default=0)
     
     # Status fields
@@ -266,7 +267,7 @@ class Service(models.Model):
             ('removal', 'Removal'),
         ]
     )
-    image = models.ImageField(upload_to='services/', blank=True, null=True)
+    image = CloudinaryField('services', folder='Polish Palette/services/', blank=True, null=True)
     features = models.JSONField(default=list, help_text="List of service features")
     badge = models.CharField(
         max_length=20,
@@ -701,7 +702,7 @@ class Appointment(models.Model):
     tip_shape = models.CharField(max_length=20, blank=True)
     tip_code = models.CharField(max_length=10, blank=True)
     has_custom_reference = models.BooleanField(default=False)
-    design_reference_image = models.ImageField(upload_to='bookings/references/', blank=True, null=True)
+    design_reference_image = CloudinaryField('design_references', folder='Polish Palette/design_references/', blank=True, null=True)
     gallery_reference = models.ForeignKey('NailDesign', on_delete=models.SET_NULL, null=True, blank=True, related_name='referenced_appointments')
     builder_checklist = models.JSONField(default=dict, blank=True)
     estimated_work_minutes = models.PositiveIntegerField(default=0)
@@ -712,7 +713,7 @@ class Appointment(models.Model):
     
     # --- NEW PAYMENT FIELDS ---
     reference_code = models.CharField(max_length=100, blank=True, null=True)
-    payment_receipt = models.ImageField(upload_to='payment_receipts/', blank=True, null=True)
+    payment_receipt = CloudinaryField('payment_receipts', folder='Polish Palette/payment_receipts/', blank=True, null=True)
 
     # --- RESCHEDULE SOFT-LOCK FIELDS ---
     proposed_date = models.DateField(null=True, blank=True)
@@ -762,7 +763,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='nail_designs/')
+    image = CloudinaryField('nail_designs', folder='Polish Palette/nail_designs/')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -843,7 +844,7 @@ class Notification(models.Model):
 class NailArtImageLibrary(models.Model):
     """Visual catalog used by the custom Nail Art selector."""
     title = models.CharField(max_length=120)
-    image = models.ImageField(upload_to='nail_art_library/')
+    image = CloudinaryField('nail_art_library', folder='Polish Palette/nail_art_library/')
     style_key = models.CharField(max_length=80, unique=True)
     weight_minutes = models.PositiveIntegerField(default=10)
     is_active = models.BooleanField(default=True)

@@ -105,3 +105,5 @@ zope.interface==8.2
 sendgrid==6.11.0
 sendgrid==6.11.0
 django-anymail
+django-cloudinary-storage
+cloudinary
