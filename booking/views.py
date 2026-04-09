@@ -19,6 +19,18 @@ import random
 import json
 import time
 import logging
+
+logger = logging.getLogger(__name__)
+
+def safe_send_mail(subject, message, from_email, recipient_list, fail_silently=False):
+    """Send email with graceful fallback for network errors"""
+    try:
+        send_mail(subject, message, from_email, recipient_list, fail_silently=fail_silently)
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send email: {e}")
+        # Don't raise the exception - let the login continue
+        return False
 import os
 from datetime import datetime, timedelta
 import re
@@ -92,7 +104,7 @@ def login_view(request):
             # Send the OTP via email
             subject = "Two-Factor Authentication Code - Polish Palette"
             message = f"Hello {user.first_name},\n\nYour 2FA code is: {otp_obj.otp}\n\nThis code expires in 2 minutes.\n\nPolish Palette Team\n"
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
             
             # Log OTP generation
             if hasattr(user, 'artist'):
@@ -322,7 +334,7 @@ def two_factor_resend(request):
     message = f"""Hello {first_name},\n\nYour new 2FA code is: {otp_obj.otp}\n\nThis code expires in 2 minutes.\n\nPolish Palette Team\n"""
     
     from django.core.mail import send_mail
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+    safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
     
     return JsonResponse({'success': True})
 
@@ -387,7 +399,7 @@ def signup_view(request):
                 # Send the OTP via email
                 subject = "Two-Factor Authentication Code - Polish Palette"
                 message = f"Hello {first_name},\n\nYour 2FA code is: {otp_obj.otp}\n\nThis code expires in 10 minutes.\n\nPolish Palette Team\n"
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+                safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
                 
                 # Save auth info to session pending 2FA verification
                 request.session['2fa_user_email'] = email
@@ -562,7 +574,7 @@ If you did not request this password reset, please ignore this email.
 Thank you,
 Nail Booking Team
             '''
-            send_mail(subject, message, 'noreply@gmail.com', [email], fail_silently=False)
+            safe_send_mail(subject, message, 'noreply@gmail.com', [email], fail_silently=False)
             
             request.session['reset_email'] = email
             messages.success(request, 'OTP has been sent to your email address.')
@@ -1688,7 +1700,7 @@ If you did not request this password reset, please ignore this email.
 Thank you,
 Polish Palette Team
             '''
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
 
             request.session['artist_reset_email'] = email
             messages.success(request, 'OTP has been sent to your email address.')
@@ -1809,7 +1821,7 @@ def artist_login_view(request):
                 # Send the OTP via email
                 subject = "Two-Factor Authentication Code - Polish Palette"
                 message = f"Hello {artist.get_first_name()},\n\nYour 2FA code is: {otp_obj.otp}\n\nThis code expires in 2 minutes.\n\nPolish Palette Team\n"
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+                safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
                 
                 # Save auth info to session pending 2FA verification
                 request.session['2fa_user_email'] = email

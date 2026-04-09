@@ -3,6 +3,19 @@ from allauth.socialaccount.models import SocialLogin
 from allauth.exceptions import ImmediateHttpResponse
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+import logging
+
+logger = logging.getLogger(__name__)
+
+def safe_send_mail(subject, message, from_email, recipient_list, fail_silently=False):
+    """Send email with graceful fallback for network errors"""
+    try:
+        send_mail(subject, message, from_email, recipient_list, fail_silently=fail_silently)
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send email: {e}")
+        # Don't raise the exception - let the login continue
+        return False
 from django.conf import settings
 from django.shortcuts import redirect
 from .models import TwoFactorOTP
@@ -72,7 +85,7 @@ If you did not attempt to login, please secure your account immediately.
 Polish Palette Team
 """
         
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+        safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
         
         print("DEBUG: Email sent, interrupting with 2FA verification")
         

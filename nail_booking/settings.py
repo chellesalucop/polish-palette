@@ -243,7 +243,12 @@ if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'noreply@polishpalette.com'
 else:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    # Try SMTP but fallback to console if network fails
+    try:
+        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    except Exception:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+        DEFAULT_FROM_EMAIL = 'noreply@polishpalette.com'
 
 # Login/Logout URLs
 LOGIN_URL = 'login'
