@@ -104,7 +104,12 @@ def login_view(request):
             # Send the OTP via email
             subject = "Two-Factor Authentication Code - Polish Palette"
             message = f"Hello {user.first_name},\n\nYour 2FA code is: {otp_obj.otp}\n\nThis code expires in 2 minutes.\n\nPolish Palette Team\n"
-            safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            email_sent = safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            
+            if not email_sent:
+                print(f"DEBUG: Email failed, but OTP code is: {otp_obj.otp}")
+            else:
+                print("DEBUG: OTP email sent successfully")
             
             # Log OTP generation
             if hasattr(user, 'artist'):

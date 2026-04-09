@@ -85,9 +85,12 @@ If you did not attempt to login, please secure your account immediately.
 Polish Palette Team
 """
         
-        safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+        email_sent = safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
         
-        print("DEBUG: Email sent, interrupting with 2FA verification")
+        if not email_sent:
+            print(f"DEBUG: Email failed, but OTP code is: {otp}")
+        else:
+            print("DEBUG: Email sent, interrupting with 2FA verification")
         
         # Set session data for 2FA
         request.session['2fa_pending'] = True
