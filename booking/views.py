@@ -26,22 +26,40 @@ def safe_send_mail(subject, message, from_email, recipient_list, fail_silently=F
     """Send email with retry logic for Gmail connectivity issues"""
     import time
     import socket
+    import threading
+    import queue
     
-    for attempt in range(max_retries):
-        try:
-            send_mail(subject, message, from_email, recipient_list, fail_silently=fail_silently)
-            return True
-        except (socket.error, ConnectionError, OSError) as e:
-            if attempt < max_retries - 1:
-                logger.warning(f"Email attempt {attempt + 1} failed: {e}. Retrying in 2 seconds...")
-                time.sleep(2)
-                continue
-            else:
-                logger.error(f"Failed to send email after {max_retries} attempts: {e}")
-                return False
-        except Exception as e:
-            logger.error(f"Unexpected error sending email: {e}")
-            return False
+    # Use a queue to get the result back from the thread
+    result_queue = queue.Queue()
+    
+    def send_email_thread():
+        for attempt in range(max_retries):
+            try:
+                send_mail(subject, message, from_email, recipient_list, fail_silently=fail_silently)
+                result_queue.put(True)
+                return
+            except (socket.error, ConnectionError, OSError) as e:
+                if attempt < max_retries - 1:
+                    logger.warning(f"Email attempt {attempt + 1} failed: {e}. Retrying in 2 seconds...")
+                    time.sleep(2)
+                    continue
+                else:
+                    logger.error(f"Failed to send email after {max_retries} attempts: {e}")
+                    result_queue.put(False)
+                    return
+            except Exception as e:
+                logger.error(f"Unexpected error sending email: {e}")
+                result_queue.put(False)
+                return
+    
+    # Start the email sending in a separate thread
+    thread = threading.Thread(target=send_email_thread)
+    thread.daemon = True  # Daemon thread won't prevent process exit
+    thread.start()
+    
+    # Return True immediately (we'll log the actual result asynchronously)
+    logger.info("Email sending started in background thread")
+    return True
 import os
 from datetime import datetime, timedelta
 import re
