@@ -228,13 +228,13 @@ USE_I18N = True
 USE_TZ = True
 
 # Email configuration for production
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = env.int('EMAIL_PORT', default=587)
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST = env('MAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env.int('MAIL_PORT', default=465)
+EMAIL_USE_TLS = env.bool('MAIL_ENCRYPTION') != 'ssl'  # TLS if not SSL
+EMAIL_USE_SSL = env.bool('MAIL_ENCRYPTION') == 'ssl'  # SSL if specified
+EMAIL_HOST_USER = env('MAIL_USERNAME')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@polishpalette.com')
+DEFAULT_FROM_EMAIL = f"{env('MAIL_FROM_NAME', 'Polish Palette')} {env('MAIL_FROM_ADDRESS', 'no-reply@yourdomain.com')}"
 
 # Email timeout settings to prevent hanging
 EMAIL_TIMEOUT = 30  # 30 seconds timeout
