@@ -242,10 +242,15 @@ DEFAULT_FROM_EMAIL = f"{mail_from_name} <{mail_from_address}>"
 # Email timeout settings to prevent hanging
 EMAIL_TIMEOUT = 30  # 30 seconds timeout
 
-# Email backend selection - always try SMTP first
-if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+# Email backend selection - use SMTP in production, console in development
+if DEBUG:
+    # Local development - use console backend
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    # Production - try SMTP
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
+    # Fallback to console
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Login/Logout URLs
