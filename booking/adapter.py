@@ -7,15 +7,26 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def safe_send_mail(subject, message, from_email, recipient_list, fail_silently=False):
-    """Send email with graceful fallback for network errors"""
-    try:
-        send_mail(subject, message, from_email, recipient_list, fail_silently=fail_silently)
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send email: {e}")
-        # Don't raise the exception - let the login continue
-        return False
+def safe_send_mail(subject, message, from_email, recipient_list, fail_silently=False, max_retries=3):
+    """Send email with retry logic for Gmail connectivity issues"""
+    import time
+    import socket
+    
+    for attempt in range(max_retries):
+        try:
+            send_mail(subject, message, from_email, recipient_list, fail_silently=fail_silently)
+            return True
+        except (socket.error, ConnectionError, OSError) as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Email attempt {attempt + 1} failed: {e}. Retrying in 2 seconds...")
+                time.sleep(2)
+                continue
+            else:
+                logger.error(f"Failed to send email after {max_retries} attempts: {e}")
+                return False
+        except Exception as e:
+            logger.error(f"Unexpected error sending email: {e}")
+            return False
 from django.conf import settings
 from django.shortcuts import redirect
 from .models import TwoFactorOTP

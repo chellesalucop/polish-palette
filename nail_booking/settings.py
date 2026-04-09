@@ -228,7 +228,7 @@ USE_I18N = True
 USE_TZ = True
 
 # Email configuration for production
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.sendgrid.net')
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
@@ -236,12 +236,10 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@polishpalette.com')
 
 # Email timeout settings to prevent hanging
-EMAIL_TIMEOUT = 10  # 10 seconds timeout
+EMAIL_TIMEOUT = 30  # 30 seconds timeout
 
-# Email backend selection
-if env('EMAIL_BACKEND_CHOICE') == 'console':
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+# Email backend selection - always try SMTP first
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
