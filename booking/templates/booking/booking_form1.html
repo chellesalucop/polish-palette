@@ -128,7 +128,7 @@
                                 <label for="artist{{ artist.id }}" class="artist-card">
                                     <div class="artist-avatar">
                                         {% if artist.user.profile_picture %}
-                                            <img src="{{ artist.user.profile_picture.url }}" alt="{{ artist.user.get_full_name }}">
+                                            <img src="{{ artist.user.profile_picture.url|safe }}" alt="{{ artist.user.get_full_name }}">
                                         {% else %}
                                             <img src="{% static 'images/pfp/default-avatar.png' %}" alt="{{ artist.user.get_full_name }}">
                                         {% endif %}

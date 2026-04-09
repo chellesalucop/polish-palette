@@ -58,8 +58,8 @@
             <!-- User Avatar -->
             <div class="nav-user-avatar">
                 {% csrf_token %}
-                {% if user.profile_picture and user.profile_picture.url %}
-                    <img src="{{ user.profile_picture.url }}" alt="Profile" class="nav-avatar-img">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url|safe }}" alt="Profile" class="nav-avatar-img">
                 {% else %}
                     <img src="{% static 'images/pfp/default-avatar.png' %}" alt="Profile" class="nav-avatar-img">
                 {% endif %}
