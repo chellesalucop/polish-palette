@@ -235,8 +235,8 @@ EMAIL_USE_TLS = mail_encryption != 'ssl'  # TLS if not SSL
 EMAIL_USE_SSL = mail_encryption == 'ssl'  # SSL if specified
 EMAIL_HOST_USER = env('MAIL_USERNAME', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
-mail_from_name = env('MAIL_FROM_NAME', 'Polish Palette')
-mail_from_address = env('MAIL_FROM_ADDRESS', 'no-reply@yourdomain.com')
+mail_from_name = env('MAIL_FROM_NAME', default='Polish Palette')
+mail_from_address = env('MAIL_FROM_ADDRESS', default='no-reply@yourdomain.com')
 DEFAULT_FROM_EMAIL = f"{mail_from_name} <{mail_from_address}>"
 
 # Email timeout settings to prevent hanging
