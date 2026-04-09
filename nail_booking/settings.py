@@ -235,8 +235,11 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
+# Email timeout settings to prevent hanging
+EMAIL_TIMEOUT = 10  # 10 seconds timeout
+
 # Development email fallback (console backend for testing)
-if not EMAIL_HOST:
+if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'noreply@polishpalette.com'
 else:
