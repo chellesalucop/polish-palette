@@ -243,9 +243,13 @@ DEFAULT_FROM_EMAIL = f"{mail_from_name} <{mail_from_address}>"
 EMAIL_TIMEOUT = 30  # 30 seconds timeout
 
 # Email backend selection - use SMTP in production, console in development
+# Temporarily force SMTP for local testing
 if DEBUG:
-    # Local development - use console backend
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    # Local development - temporarily use SMTP for testing
+    if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    else:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     # Production - try SMTP
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
