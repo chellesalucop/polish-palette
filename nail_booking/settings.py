@@ -228,27 +228,23 @@ USE_I18N = True
 USE_TZ = True
 
 # Email configuration for production
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.sendgrid.net')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@polishpalette.com')
 
 # Email timeout settings to prevent hanging
 EMAIL_TIMEOUT = 10  # 10 seconds timeout
 
-# Development email fallback (console backend for testing)
-if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+# Email backend selection
+if env('EMAIL_BACKEND_CHOICE') == 'console':
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    DEFAULT_FROM_EMAIL = 'noreply@polishpalette.com'
+elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
-    # Try SMTP but fallback to console if network fails
-    try:
-        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    except Exception:
-        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-        DEFAULT_FROM_EMAIL = 'noreply@polishpalette.com'
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Login/Logout URLs
 LOGIN_URL = 'login'
