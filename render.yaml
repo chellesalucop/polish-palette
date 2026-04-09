@@ -6,7 +6,7 @@ services:
     plan: free
     buildCommand: "./build.sh"
     startCommand: "gunicorn nail_booking.wsgi:application --bind 0.0.0.0:$PORT"
-    healthCheckPath: /
+    healthCheckPath: /health/
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION

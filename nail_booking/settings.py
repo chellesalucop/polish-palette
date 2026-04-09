@@ -111,6 +111,8 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 DISABLE_TWO_FACTOR_AUTH = False
 
 MIDDLEWARE = [
+    # Health check bypass - must be first for performance
+    'booking.views_health.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -120,9 +122,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'booking.middleware.OneTimeMessageMiddleware',
     'booking.middleware.PostRedirectGetMiddleware',
-    # 'booking.middleware.RedirectLoopMiddleware',  # Temporarily disabled
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    # Security middleware - keep these for your protection
     'booking.middleware.BruteForceProtectionMiddleware',
     'booking.middleware.OTPRateLimitMiddleware',
     'booking.middleware.TwoFactorMiddleware',

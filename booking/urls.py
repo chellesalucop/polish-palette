@@ -1,16 +1,11 @@
 from django.urls import path, include
-
-
-
 from . import views
-
-
-
-
-
+from . import views_health
 
 
 urlpatterns = [
+    # Health check endpoint (must be first for performance)
+    path('health/', views_health.health_check, name='health_check'),
 
 
 
