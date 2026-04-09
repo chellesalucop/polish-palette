@@ -242,17 +242,21 @@ DEFAULT_FROM_EMAIL = f"{mail_from_name} <{mail_from_address}>"
 # Email timeout settings to prevent hanging
 EMAIL_TIMEOUT = 30  # 30 seconds timeout
 
-# Email backend selection - use SMTP in production, console in development
-# Temporarily force SMTP for local testing
+# Import SendGrid backend
+import sys
+import os
+sys.path.append(os.path.join(BASE_DIR, 'booking'))
+
+# Email backend selection - use SendGrid in production, SMTP locally
 if DEBUG:
-    # Local development - temporarily use SMTP for testing
+    # Local development - use SMTP
     if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
         EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     else:
         EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    # Production - try SMTP
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    # Production - use SendGrid backend
+    EMAIL_BACKEND = 'booking.sendgrid_backend.SendGridEmailBackend'
 else:
     # Fallback to console
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
