@@ -230,8 +230,9 @@ USE_TZ = True
 # Email configuration for production
 EMAIL_HOST = env('MAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = env.int('MAIL_PORT', default=465)
-EMAIL_USE_TLS = env.bool('MAIL_ENCRYPTION') != 'ssl'  # TLS if not SSL
-EMAIL_USE_SSL = env.bool('MAIL_ENCRYPTION') == 'ssl'  # SSL if specified
+mail_encryption = env('MAIL_ENCRYPTION', default='ssl')
+EMAIL_USE_TLS = mail_encryption != 'ssl'  # TLS if not SSL
+EMAIL_USE_SSL = mail_encryption == 'ssl'  # SSL if specified
 EMAIL_HOST_USER = env('MAIL_USERNAME')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 mail_from_name = env('MAIL_FROM_NAME', 'Polish Palette')
