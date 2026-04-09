@@ -233,8 +233,8 @@ EMAIL_PORT = env.int('MAIL_PORT', default=465)
 mail_encryption = env('MAIL_ENCRYPTION', default='ssl')
 EMAIL_USE_TLS = mail_encryption != 'ssl'  # TLS if not SSL
 EMAIL_USE_SSL = mail_encryption == 'ssl'  # SSL if specified
-EMAIL_HOST_USER = env('MAIL_USERNAME')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = env('MAIL_USERNAME', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 mail_from_name = env('MAIL_FROM_NAME', 'Polish Palette')
 mail_from_address = env('MAIL_FROM_ADDRESS', 'no-reply@yourdomain.com')
 DEFAULT_FROM_EMAIL = f"{mail_from_name} <{mail_from_address}>"
