@@ -86,16 +86,21 @@ logger = logging.getLogger(__name__)
 # Load environment variables and configure Gemini
 load_dotenv()
 genai_client = None
-if genai and os.getenv("GEMINI_API_KEY"):
-    try:
-        genai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    except AttributeError:
-        # Fallback to old API if available
+
+def get_genai_client():
+    """Lazy initialization of Gemini client to prevent worker crashes"""
+    global genai_client
+    if genai_client is None and genai and os.getenv("GEMINI_API_KEY"):
         try:
-            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-            genai_client = genai
+            genai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         except AttributeError:
-            genai_client = None
+            # Fallback to old API if available
+            try:
+                genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+                genai_client = genai
+            except AttributeError:
+                genai_client = None
+    return genai_client
 
 # --- GENERAL & AUTH VIEWS ---
 
@@ -2432,7 +2437,7 @@ def get_design_recommendations(request):
     if not client_preference:
         recommended_designs = random.sample(active_designs, min(len(active_designs), 3))
     
-    elif client_preference and genai_client:
+    elif client_preference and get_genai_client():
         try:
             catalog_text = "\n".join([f"ID: {d.id} | Title: {d.title} | Tags: {d.tags}" for d in active_designs])
             
@@ -2468,14 +2473,15 @@ def get_design_recommendations(request):
             ]
 
             # Pass the safety settings to whichever API version is active
-            if hasattr(genai_client, 'models'):
-                response = genai_client.models.generate_content(
+            client = get_genai_client()
+            if hasattr(client, 'models'):
+                response = client.models.generate_content(
                     model='gemini-2.5-flash',
                     contents=prompt
                 )
                 ai_text = response.text.strip()
             else:
-                model = genai_client.GenerativeModel('gemini-2.5-flash')
+                model = client.GenerativeModel('gemini-2.5-flash')
                 response = model.generate_content(
                     prompt
                 )
