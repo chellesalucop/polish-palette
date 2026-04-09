@@ -227,34 +227,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Email configuration for production
-EMAIL_HOST = env('MAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = env.int('MAIL_PORT', default=465)
-mail_encryption = env('MAIL_ENCRYPTION', default='ssl')
-EMAIL_USE_TLS = mail_encryption != 'ssl'  # TLS if not SSL
-EMAIL_USE_SSL = mail_encryption == 'ssl'  # SSL if specified
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-mail_from_name = env('MAIL_FROM_NAME', default='Polish Palette')
-mail_from_address = env('MAIL_FROM_ADDRESS', default='no-reply@yourdomain.com')
-DEFAULT_FROM_EMAIL = f"{mail_from_name} <{mail_from_address}>"
-
-# Email timeout settings to prevent hanging
-EMAIL_TIMEOUT = 30  # 30 seconds timeout
-
-# Email backend selection - use SMTP in production, console in development
-if DEBUG:
-    # Local development - use SMTP
-    if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    else:
-        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-elif EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    # Production - try SMTP
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-else:
-    # Fallback to console
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email configuration for Resend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.resend.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'resend'
+EMAIL_HOST_PASSWORD = os.environ.get('RESEND_API_KEY')
+DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'
 
 # Login/Logout URLs
 LOGIN_URL = 'login'
