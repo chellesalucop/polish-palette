@@ -810,15 +810,23 @@ class NailDesign(models.Model):
     @property
     def image_url(self):
         """
-        Always returns a local static URL for the nail design image.
-        Extracts the filename from the Cloudinary URL or stored path to use the local gallery.
+        Returns the Cloudinary URL. If the database still contains legacy local paths 
+        (from the deleted gallery folder), it automatically redirects them to the 
+        new Cloudinary 'artist_gallery' folder.
         """
-        from django.templatetags.static import static
+        if not self.image:
+            return ''
+            
         import os
-
-        if self.image:
-            return self.image.url
-        return ''
+        url = str(self.image.url)
+        
+        # Rescue logic: If path points to the deleted images/gallery local folder
+        if any(fix in url for fix in ['images/gallery/', 'static/gallery/']):
+            filename = os.path.basename(url)
+            # Construct the manual Cloudinary path provided by the user
+            return f"https://res.cloudinary.com/dujnises2/image/upload/Polish%20Palette/artist_gallery/{filename}"
+            
+        return url
 
     @property
     def get_tag_list(self):
