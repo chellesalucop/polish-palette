@@ -1,3 +1,0 @@
-"""
-Booking utilities package
-"""
