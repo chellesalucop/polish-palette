@@ -237,7 +237,17 @@
                 {% for design in designs %}
                 <div class="col-md-6 col-xl-4">
                     <div class="design-card bg-white shadow-sm h-100 d-flex flex-column">
-                        <img src="{{ design.image_url }}" alt="{{ design.title }}" class="design-img">
+                        <div class="position-relative">
+                            <img src="{{ design.image_url }}" alt="{{ design.title }}" class="design-img">
+                            <div class="position-absolute top-0 end-0 p-2">
+                                <a href="{% url 'delete_nail_design' design.id %}" 
+                                   class="btn btn-danger btn-sm rounded-circle opacity-75 hover-opacity-100" 
+                                   onclick="return confirm('Are you sure you want to delete this design?')"
+                                   title="Delete Design">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
                         <div class="p-3 flex-grow-1 d-flex flex-column">
                             <h6 class="fw-bold mb-2">{{ design.title }}</h6>
 

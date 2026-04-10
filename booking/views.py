@@ -2435,6 +2435,13 @@ def ai_portfolio_manager(request):
         'services': services
     })
 
+@artist_login_required
+def delete_nail_design(request, design_id):
+    design = get_object_or_404(NailDesign, id=design_id)
+    design.delete()
+    messages.success(request, f'Design "{design.title}" has been removed.')
+    return redirect('ai_portfolio_manager')
+
 # --- LAYER 1: The Input Sanitizer (What the user types) ---
 def sanitize_ai_input(user_text):
     if not user_text:

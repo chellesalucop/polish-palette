@@ -238,6 +238,7 @@ urlpatterns = [
 # AI-Powered Features
 
     path('dashboard/ai-portfolio/', views.ai_portfolio_manager, name='ai_portfolio_manager'),
+    path('dashboard/ai-portfolio/delete/<int:design_id>/', views.delete_nail_design, name='delete_nail_design'),
 
 
 
