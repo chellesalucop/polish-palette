@@ -1567,7 +1567,7 @@ def artist_approve_reject_view(request):
         artist = request.user.artist
     elif request.session.get('artist_authenticated') and request.session.get('artist_id'):
         try:
-            from .models import Artist, ServiceHistory
+            from .models import Artist, ServiceHistory, Appointment
             artist = Artist.objects.get(id=request.session['artist_id'])
         except Artist.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
