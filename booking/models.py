@@ -834,11 +834,19 @@ class NailDesign(models.Model):
             except Exception:
                 pass
 
-        # 3. Final Fallback: Try the main artist_gallery folder for other legacy items
+        # 3. Folder Fallback: Try the manual migration folder
         try:
             filename = os.path.basename(url)
             if filename:
                 return f"https://res.cloudinary.com/dujnises2/image/upload/v1/Polish%20Palette/artist_gallery/{filename}"
+        except Exception:
+            pass
+
+        # 4. Root Fallback: Try the root upload folder for renamed items
+        try:
+            filename = os.path.basename(url)
+            if filename:
+                return f"https://res.cloudinary.com/dujnises2/image/upload/v1/{filename}"
         except Exception:
             pass
                 
