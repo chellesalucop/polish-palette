@@ -266,6 +266,76 @@ document.getElementById('profilePictureInput').addEventListener('change', functi
     }
 });
 
+// Handle profile picture form submission with AJAX to prevent page reload
+document.getElementById('profilePictureForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('input[type="submit"], button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+    
+    // Show loading state
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-spinner-border spin"></i> Uploading...';
+    }
+    
+    fetch('{% url "profile_picture" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showToast('Profile picture updated successfully!', 'success');
+            
+            // Refresh the profile picture with cache busting
+            const profileImg = document.getElementById('currentProfilePic');
+            const timestamp = new Date().getTime();
+            profileImg.src = data.image_url + '?t=' + timestamp;
+        } else {
+            // Show error message
+            showToast(data.message || 'Upload failed', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        showToast('Upload failed. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    });
+});
+
+// Toast notification function
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert">×</button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 // Password Toggle
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);

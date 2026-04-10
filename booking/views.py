@@ -557,12 +557,32 @@ def profile_picture_view(request):
             # Force refresh the user object to get the latest Cloudinary URL
             request.user.refresh_from_db()
             
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Profile picture updated successfully!',
+                    'image_url': request.user.profile_picture.url
+                })
+            
             messages.success(request, 'Profile picture updated successfully!')
         except Exception as e:
             logger.error(f"Profile picture upload error: {str(e)}")
+            
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': f'An error occurred while uploading your profile picture: {str(e)}'
+                })
+            
             messages.error(request, f'An error occurred while uploading your profile picture: {str(e)}')
     
-    return redirect('profile')
+    # For regular form submission, redirect to profile page
+    if request.method == 'POST' and request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return redirect('profile')
+    
+    return render(request, "booking/client_profile.html")
 
 @login_required
 def change_password_view(request):
