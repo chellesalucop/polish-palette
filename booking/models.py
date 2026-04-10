@@ -797,7 +797,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = CloudinaryField('nail_designs', folder='Polish Palette/nail_designs/')
+    image = CloudinaryField('nail_designs', folder='Polish Palette/artist_gallery/')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -817,14 +817,7 @@ class NailDesign(models.Model):
         import os
 
         if self.image:
-            try:
-                # Always extract filename from the URL (whether http or local path)
-                filename = os.path.basename(str(self.image.url))
-                if filename:
-                    return static(f'images/gallery/{filename}')
-            except Exception:
-                pass
-                
+            return self.image.url
         return ''
 
     @property

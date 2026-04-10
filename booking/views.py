@@ -119,7 +119,8 @@ def landing(request):
         if hasattr(request.user, 'artist'):
             return redirect('artist_dashboard')
         return redirect('dashboard')
-    return render(request, "booking/landing.html")
+    gallery_designs = NailDesign.objects.filter(is_active=True).order_by('-created_at')[:9]
+    return render(request, "booking/landing.html", {'gallery_designs': gallery_designs})
 
 def login_view(request):
     if request.user.is_authenticated:

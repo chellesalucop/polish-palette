@@ -83,50 +83,14 @@
         <div class="gallery-wrapper">
             <div class="gallery-grid" id="galleryGrid">
 
+                {% for design in gallery_designs %}
                 <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails1.png' %}" alt="">
-                    <div class="gallery-caption">Matcha Pearl Elegance</div>
+                    <img src="{{ design.image_url }}" alt="{{ design.title }}">
+                    <div class="gallery-caption">{{ design.title }}</div>
                 </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails2.png' %}" alt="">
-                    <div class="gallery-caption">Sea Prism Dominos</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails3.png' %}" alt="">
-                    <div class="gallery-caption">Ruby Rose Quartet</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails4.png' %}" alt="">
-                    <div class="gallery-caption">Vintage Glamour Spark</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails5.png' %}" alt="">
-                    <div class="gallery-caption">Retro Summer Calling</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails6.png' %}" alt="">
-                    <div class="gallery-caption">Fairy Fanatic Space</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails7.png' %}" alt="">
-                    <div class="gallery-caption">Maidens Flower Garden</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails8.png' %}" alt="">
-                    <div class="gallery-caption">Polka Fluff Shells</div>
-                </div>
-
-                <div class="gallery-item">
-                    <img src="{% static 'images/gallery/nails9.png' %}" alt="">
-                    <div class="gallery-caption">Ruby Red Elegance</div>
-                </div>
+                {% empty %}
+                <p style="text-align: center; grid-column: 1 / -1; color: #666;">Check back later for new designs!</p>
+                {% endfor %}
 
             </div>
 
@@ -150,7 +114,7 @@
         <div class="modal-controls">
             <button class="modal-btn modal-prev">‹</button>
             <div class="modal-indicator">
-                <span id="currentImageNum">1</span> / <span id="totalImages">9</span>
+                <span id="currentImageNum">1</span> / <span id="totalImages">{{ gallery_designs|length }}</span>
             </div>
             <button class="modal-btn modal-next">›</button>
         </div>
