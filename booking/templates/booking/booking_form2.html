@@ -663,12 +663,7 @@
                 <div class="gallery-grid" id="galleryGrid">
                     {% for design in gallery_designs %}
                         
-                        {% if design.image %}
-                        <div class="gallery-item" data-image-id="{{ design.id }}">
-                            <img src="{{ design.image.url }}" alt="{{ design.title }}"> 
-                        </div>
-                        
-                        {% elif design.image_url %}
+                        {% if design.image_url %}
                         <div class="gallery-item" data-image-id="{{ design.id }}">
                             <img src="{{ design.image_url }}" alt="{{ design.title }}"> 
                         </div>
