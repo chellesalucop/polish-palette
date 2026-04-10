@@ -94,22 +94,22 @@ def get_genai_client():
         return None
 
     try:
-        # Try the new Google GenAI SDK first
-        import google.genai as genai
-        genai_client = genai.Client(api_key=api_key)
-        logger.info("Gemini initialized using google.genai SDK")
+        # Try the older but more stable generativeai SDK first
+        import google.generativeai as genai_legacy
+        genai_legacy.configure(api_key=api_key)
+        genai_client = genai_legacy
+        logger.info("Gemini initialized using google.generativeai SDK")
     except (ImportError, Exception) as e:
-        logger.warning(f"Could not initialize google.genai: {e}. Trying fallback...")
+        logger.warning(f"Could not initialize google.generativeai: {e}. Trying newer SDK...")
         try:
-            # Fallback to the older generativeai SDK
-            import google.generativeai as genai_legacy
-            genai_legacy.configure(api_key=api_key)
-            genai_client = genai_legacy
-            logger.info("Gemini initialized using fallback google.generativeai SDK")
+            # Fallback to the new Google GenAI SDK
+            import google.genai as genai
+            genai_client = genai.Client(api_key=api_key)
+            logger.info("Gemini initialized using google.genai SDK")
         except (ImportError, Exception) as fallback_e:
             logger.error(f"Failed to initialize any Gemini SDK: {fallback_e}")
             genai_client = None
-            
+    
     return genai_client
 
 # --- GENERAL & AUTH VIEWS ---
@@ -2539,9 +2539,10 @@ def get_design_recommendations(request):
             
         except Exception as e:
             # If Google blocks the content due to Safety Settings, it throws an exception here.
-            # We catch it, log it, and return empty results so the app doesn't crash.
+            # We catch it, log it, and return random results so the user isn't stuck.
             logger.exception(f"Gemini API error or Safety Block triggered: {e}")
-            recommended_designs = []
+            # Fallback to random designs on any failure
+            recommended_designs = random.sample(active_designs, min(len(active_designs), 3))
 
     data = [{
         'id': design.id, 
