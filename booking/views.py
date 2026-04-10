@@ -67,13 +67,7 @@ import html
 from dotenv import load_dotenv
 from booking.decorators import artist_login_required
 
-try:
-    import google.genai as genai
-except ImportError:
-    try:
-        import google.generativeai as genai
-    except ImportError:
-        genai = None
+# Gemini setup will be handled with lazy imports in get_genai_client()
 
 # Models import
 from .models import Client, PasswordResetOTP, Artist, Service, Appointment, ServiceHistory, NailDesign, Notification, Review, ReviewEditLog, NailArtImageLibrary, FileUploadLog, ClientFileUpload
@@ -88,18 +82,32 @@ load_dotenv()
 genai_client = None
 
 def get_genai_client():
-    """Lazy initialization of Gemini client to prevent worker crashes"""
+    """Lazy initialization of Gemini client to prevent worker crashes on memory-limited environments"""
     global genai_client
-    if genai_client is None and genai and os.getenv("GEMINI_API_KEY"):
+    if genai_client is not None:
+        return genai_client
+    
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+
+    try:
+        # Try the new Google GenAI SDK first
+        import google.genai as genai
+        genai_client = genai.Client(api_key=api_key)
+        logger.info("Gemini initialized using google.genai SDK")
+    except (ImportError, Exception) as e:
+        logger.warning(f"Could not initialize google.genai: {e}. Trying fallback...")
         try:
-            genai_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-        except AttributeError:
-            # Fallback to old API if available
-            try:
-                genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-                genai_client = genai
-            except AttributeError:
-                genai_client = None
+            # Fallback to the older generativeai SDK
+            import google.generativeai as genai_legacy
+            genai_legacy.configure(api_key=api_key)
+            genai_client = genai_legacy
+            logger.info("Gemini initialized using fallback google.generativeai SDK")
+        except (ImportError, Exception) as fallback_e:
+            logger.error(f"Failed to initialize any Gemini SDK: {fallback_e}")
+            genai_client = None
+            
     return genai_client
 
 # --- GENERAL & AUTH VIEWS ---
