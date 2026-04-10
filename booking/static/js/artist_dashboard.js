@@ -1,4 +1,5 @@
 // Artist Dashboard - Simplified initialization
+window.rejectionInProgress = {};
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Digital Clock
     updateTime();
