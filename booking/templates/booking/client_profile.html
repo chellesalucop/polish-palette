@@ -315,6 +315,12 @@ document.getElementById('profilePictureForm').addEventListener('submit', functio
     });
 });
 
+// Profile picture error handling function
+function handleProfilePictureError(img) {
+    img.onerror = null; // Prevent infinite loop
+    img.src = '/static/images/pfp/default-avatar.png';
+}
+
 // Toast notification function
 function showToast(message, type) {
     const toast = document.createElement('div');

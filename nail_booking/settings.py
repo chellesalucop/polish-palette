@@ -242,6 +242,7 @@ CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'SECURE': True,  # Force HTTPS URLs
 }
 
 # Default Cloudinary folder for Polish Palette
@@ -279,6 +280,24 @@ SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Content Security Policy to allow Cloudinary images
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
+CSP_IMG_SRC = ("'self'", "data:", "https:", "https://res.cloudinary.com")
+CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_CONNECT_SRC = ("'self'", "wss:", "https:")
+
+# Custom CSP header
+SECURE_CONTENT_SECURITY_POLICY = {
+    'default-src': CSP_DEFAULT_SRC,
+    'script-src': CSP_SCRIPT_SRC,
+    'style-src': CSP_STYLE_SRC,
+    'img-src': CSP_IMG_SRC,
+    'font-src': CSP_FONT_SRC,
+    'connect-src': CSP_CONNECT_SRC,
+}
 
 # Session Security
 SESSION_COOKIE_SECURE = not DEBUG
