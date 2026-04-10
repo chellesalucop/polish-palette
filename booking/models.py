@@ -810,11 +810,17 @@ class NailDesign(models.Model):
     @property
     def image_url(self):
         """
-        Strict Cloudinary-only URL for the portfolio.
+        Ensures an absolute Cloudinary URL is always returned.
         """
-        if self.image:
-            return self.image.url
-        return "/static/images/services/default-service.jpg"
+        if not self.image:
+            return "/static/images/services/default-service.jpg"
+            
+        url = str(self.image.url)
+        if url.startswith('http'):
+            return url
+            
+        # If relative (common in local dev), force the Cloudinary BASE URL
+        return f"https://res.cloudinary.com/dujnises2/image/upload/{url}"
 
     @property
     def get_tag_list(self):
