@@ -287,21 +287,33 @@ class Service(models.Model):
 
     @property
     def image_url(self):
-        """Returns a valid URL for the service image, with multiple fallbacks."""
-        if self.image and hasattr(self.image, 'url'):
-            url = str(self.image.url)
-            if url.startswith('http'):
-                return url
-        
-        # Static Fallback based on category
+        """Returns a valid static URL for the service image based on the service name."""
         from django.templatetags.static import static
+        name_lower = self.name.lower()
+        
+        # Mapping service names to specific static images
+        if 'plain' in name_lower:
+            return static('images/services/plain.jpg')
+        elif 'minimal' in name_lower:
+            return static('images/services/minimal.jpg')
+        elif 'full' in name_lower:
+            # Check for 'full set' or just 'full'
+            return static('images/services/fullset.jpg')
+        elif 'advanced' in name_lower:
+            return static('images/services/advance.jpg')
+        elif 'gel polish removal' in name_lower or 'gel removal' in name_lower:
+            return static('images/services/gelremoval.jpg')
+        elif 'extensions removal' in name_lower or 'extension removal' in name_lower:
+            return static('images/services/extensionremove.jpg')
+        
+        # Category-based fallback
         if self.category == 'gel_polish':
             return static('images/services/cardGelpolish.jpg')
-        elif self.category in ['extensions', 'soft_gel_extensions']:
+        elif self.category == 'soft_gel_extensions' or self.category == 'extensions':
             return static('images/services/cardExtension.jpg')
         elif self.category == 'removal':
             return static('images/services/cardRemoval.jpg')
-        
+            
         return static('images/services/default-service.jpg')
 
     class Meta:
@@ -722,7 +734,7 @@ class Appointment(models.Model):
     tip_shape = models.CharField(max_length=20, blank=True)
     tip_code = models.CharField(max_length=10, blank=True)
     has_custom_reference = models.BooleanField(default=False)
-    design_reference_image = CloudinaryField('design_references', folder='Polish Palette/design_references/', blank=True, null=True)
+    design_reference_image = CloudinaryField('design_references', folder='Polish Palette/custom_nail_design/', blank=True, null=True)
     gallery_reference = models.ForeignKey('NailDesign', on_delete=models.SET_NULL, null=True, blank=True, related_name='referenced_appointments')
     builder_checklist = models.JSONField(default=dict, blank=True)
     estimated_work_minutes = models.PositiveIntegerField(default=0)
@@ -796,22 +808,28 @@ class NailDesign(models.Model):
     @property
     def image_url(self):
         """
-        Smart URL fetcher:
-        1. If it's a Cloudinary URL, return it.
-        2. If it's a local filename, prepend the static gallery path.
+        Returns a valid URL for the nail design image.
+        Prioritizes Cloudinary hosted URLs, fallbacks to static gallery.
         """
-        if self.image and hasattr(self.image, 'url'):
-            url = str(self.image.url)
-            # If it's a Cloudinary hosted URL (starts with http)
-            if url.startswith('http'):
-                return url
-            
-            # If it's a local filename from migrations
-            from django.templatetags.static import static
-            import os
-            filename = os.path.basename(url)
-            return static(f'images/gallery/{filename}')
-        
+        from django.templatetags.static import static
+        import os
+
+        if self.image:
+            try:
+                url = str(self.image.url)
+                # If it's a full Cloudinary URL
+                if url.startswith('http'):
+                    return url
+                
+                # If it's a path or filename, extract basename and use static/images/gallery
+                filename = os.path.basename(url)
+                if filename:
+                    return static(f'images/gallery/{filename}')
+            except Exception:
+                # If accessing .url fails or image is invalid
+                pass
+                
+        # Final fallback if title matches a known static file or just return empty
         return ''
 
     @property

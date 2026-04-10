@@ -915,20 +915,12 @@ def booking_create_view(request):
                 messages.error(request, f'{artist.get_full_name()} is already booked at this time. Please choose a different time slot.')
                 return redirect('booking_create')
             
-            # Handle reference file upload explicitly
-            reference_path = None
-            if service_category != 'removal' and reference_type == 'upload' and reference_file:
-                # Save to media/bookings/references/
-                reference_path = default_storage.save(
-                    f'bookings/references/{request.user.id}_{int(time.time())}_{reference_file.name}',
-                    reference_file
-                )
-            
             # EXPLICIT FORMATTING: Create the perfect reference string based on type
             final_reference_code = None
             if service_category != 'removal':
-                if reference_type == 'upload' and reference_path:
-                    final_reference_code = reference_path
+                if reference_type == 'upload' and reference_file:
+                    # Will be handled by design_reference_image field directly
+                    final_reference_code = f"upload_{request.user.id}_{int(time.time())}"
                 elif reference_type == 'gallery' and gallery_image_id:
                     final_reference_code = f"gallery_{gallery_image_id}"
             
@@ -953,6 +945,9 @@ def booking_create_view(request):
                 requires_double_slot=False,  # Single 60-minute slot
                 reference_code=final_reference_code, # Bulletproof DB save
                 custom_art_description=custom_art_description,
+                has_custom_reference=(reference_type == 'upload' and reference_file is not None),
+                design_reference_image=reference_file if (reference_type == 'upload') else None,
+                gallery_reference=NailDesign.objects.get(id=gallery_image_id) if (reference_type == 'gallery' and gallery_image_id) else None,
                 payment_receipt=None,
                 builder_checklist={
                     'service_category': service_category,
@@ -1106,7 +1101,7 @@ def booking_create_view(request):
 
 def services_view(request):
     services = Service.objects.filter(is_active=True).exclude(
-        name__icontains='Remove - Extensions Removal'
+        name__icontains='Removal - Extensions Removal'
     ).exclude(
         name__icontains='Removal - Gel Polish Removal'
     ).exclude(
