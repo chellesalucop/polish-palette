@@ -797,7 +797,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = CloudinaryField('nail_designs', folder='PolishPalette/artist_gallery')
+    image = CloudinaryField('nail_designs', folder='Polish Palette/artist_gallery')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -809,28 +809,32 @@ class NailDesign(models.Model):
 
     @property
     def image_url(self):
-        from django.templatetags.static import static
+        """
+        Returns the Cloudinary URL. 
+        If a legacy local path is found in the database, it is automatically 
+        mapped to the Cloudinary 'Polish Palette/artist_gallery' path.
+        """
         import os
-
         if not self.image:
-            return ''
+            # Fallback for empty designs
+            return "/static/images/services/default-service.jpg"
 
-        image_url_str = str(self.image.url)
-        
-        # 1. Check for legacy paths first (even if they have Cloudinary base URL)
-        if 'images/gallery/' in image_url_str:
-            try:
-                filename = os.path.basename(image_url_str)
-                if filename:
-                    return static(f'images/gallery/{filename}')
-            except Exception:
-                pass
+        url = str(self.image.url)
 
-        # 2. If it's a true Cloudinary upload (already in the correct cloud folder)
-        if image_url_str.startswith('http'):
-            return image_url_str
+        # If it's already a full Cloudinary URL, return it
+        if url.startswith('http'):
+            return url
 
-        return ''
+        # Transformation Logic: Convert legacy local path strings to Cloudinary URLs
+        try:
+            filename = os.path.basename(url)
+            if filename:
+                # Point to your manual Cloudinary migration folder
+                return f"https://res.cloudinary.com/dujnises2/image/upload/v1/Polish%20Palette/artist_gallery/{filename}"
+        except Exception:
+            pass
+                
+        return url
 
     @property
     def get_tag_list(self):
