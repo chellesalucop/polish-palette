@@ -810,22 +810,31 @@ class NailDesign(models.Model):
     @property
     def image_url(self):
         """
-        Ensures an absolute Cloudinary URL is always returned.
+        Secure Cloudinary URL.
+        Includes rescue logic for legacy 'images/gallery/' folder paths.
         """
         if not self.image:
             return "/static/images/services/default-service.jpg"
 
         url = str(self.image.url)
-        
-        # 1. Force HTTPS (Prevents browsers from blocking 'unsecure' http images)
+
+        # 1. Force HTTPS
         if url.startswith('http:'):
             url = url.replace('http:', 'https:', 1)
-            
+
+        # 2. Rescue Logic for legacy 'images/gallery/' folder
+        if 'images/gallery/' in url:
+            import os
+            filename = os.path.basename(url)
+            return f"https://res.cloudinary.com/dujnises2/image/upload/v1/images/gallery/{filename}"
+
         if url.startswith('https:'):
             return url
             
-        # 2. If relative, force the Cloudinary SECURE base URL
-        return f"https://res.cloudinary.com/dujnises2/image/upload/{url}"
+        # 3. Handle relative paths (Future uploads to Polish Palette folder)
+        import os
+        filename = os.path.basename(url)
+        return f"https://res.cloudinary.com/dujnises2/image/upload/v1/Polish%20Palette/artist_gallery/{filename}"
 
     @property
     def get_tag_list(self):
