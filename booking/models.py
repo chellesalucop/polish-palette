@@ -797,7 +797,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = CloudinaryField('nail_designs', folder='images/gallery/')
+    image = CloudinaryField('nail_designs', folder='Polish Palette/artist_gallery/')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -812,14 +812,21 @@ class NailDesign(models.Model):
         from django.templatetags.static import static
         import os
 
-        if self.image:
-            try:
-                # Always extract filename from the URL (whether http or local path)
-                filename = os.path.basename(str(self.image.url))
-                if filename:
-                    return static(f'images/gallery/{filename}')
-            except Exception:
-                pass
+        if not self.image:
+            return ''
+
+        # If it's a full Cloudinary URL (new uploads), use it directly
+        image_url_str = str(self.image.url)
+        if image_url_str.startswith('http'):
+            return image_url_str
+
+        # Otherwise, try local static fallback for restored legacy images
+        try:
+            filename = os.path.basename(image_url_str)
+            if filename:
+                return static(f'images/gallery/{filename}')
+        except Exception:
+            pass
                 
         return ''
 
