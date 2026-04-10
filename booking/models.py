@@ -292,14 +292,13 @@ class Service(models.Model):
         name_lower = self.name.lower()
         
         # Mapping service names to specific static images
-        if 'plain' in name_lower:
+        if 'plain' in name_lower or 'basic' in name_lower:
             return static('images/services/plain.jpg')
-        elif 'minimal' in name_lower:
+        elif 'minimal' in name_lower or 'color' in name_lower:
             return static('images/services/minimal.jpg')
-        elif 'full' in name_lower:
-            # Check for 'full set' or just 'full'
+        elif 'full' in name_lower or 'french' in name_lower:
             return static('images/services/fullset.jpg')
-        elif 'advanced' in name_lower:
+        elif 'advanced' in name_lower or 'nail art' in name_lower:
             return static('images/services/advance.jpg')
         elif 'gel polish removal' in name_lower or 'gel removal' in name_lower:
             return static('images/services/gelremoval.jpg')
@@ -309,8 +308,11 @@ class Service(models.Model):
         # Category-based fallback
         if self.category == 'gel_polish':
             return static('images/services/cardGelpolish.jpg')
-        elif self.category == 'soft_gel_extensions' or self.category == 'extensions':
+        elif self.category == 'soft_gel_extensions':
             return static('images/services/cardExtension.jpg')
+        elif self.category == 'extensions':
+            # Use Logo for basic extensions fallback
+            return static('images/services/logoNailextent.png')
         elif self.category == 'removal':
             return static('images/services/cardRemoval.jpg')
             
@@ -808,28 +810,21 @@ class NailDesign(models.Model):
     @property
     def image_url(self):
         """
-        Returns a valid URL for the nail design image.
-        Prioritizes Cloudinary hosted URLs, fallbacks to static gallery.
+        Always returns a local static URL for the nail design image.
+        Extracts the filename from the Cloudinary URL or stored path to use the local gallery.
         """
         from django.templatetags.static import static
         import os
 
         if self.image:
             try:
-                url = str(self.image.url)
-                # If it's a full Cloudinary URL
-                if url.startswith('http'):
-                    return url
-                
-                # If it's a path or filename, extract basename and use static/images/gallery
-                filename = os.path.basename(url)
+                # Always extract filename from the URL (whether http or local path)
+                filename = os.path.basename(str(self.image.url))
                 if filename:
                     return static(f'images/gallery/{filename}')
             except Exception:
-                # If accessing .url fails or image is invalid
                 pass
                 
-        # Final fallback if title matches a known static file or just return empty
         return ''
 
     @property
