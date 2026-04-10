@@ -797,7 +797,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = CloudinaryField('nail_designs', folder='Polish Palette/artist_gallery/')
+    image = CloudinaryField('nail_designs', folder='PolishPalette/artist_gallery')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -815,19 +815,21 @@ class NailDesign(models.Model):
         if not self.image:
             return ''
 
-        # If it's a full Cloudinary URL (new uploads), use it directly
         image_url_str = str(self.image.url)
+        
+        # 1. Check for legacy paths first (even if they have Cloudinary base URL)
+        if 'images/gallery/' in image_url_str:
+            try:
+                filename = os.path.basename(image_url_str)
+                if filename:
+                    return static(f'images/gallery/{filename}')
+            except Exception:
+                pass
+
+        # 2. If it's a true Cloudinary upload (already in the correct cloud folder)
         if image_url_str.startswith('http'):
             return image_url_str
 
-        # Otherwise, try local static fallback for restored legacy images
-        try:
-            filename = os.path.basename(image_url_str)
-            if filename:
-                return static(f'images/gallery/{filename}')
-        except Exception:
-            pass
-                
         return ''
 
     @property
