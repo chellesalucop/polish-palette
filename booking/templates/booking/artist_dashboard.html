@@ -81,11 +81,13 @@
                                     {% endif %}
                                 </small>
                                 
-                                <div class="mt-2">
+                                <div class="mt-2 text-center">
                                     {% if appointment.gallery_reference %}
-                                        <img src="{% if appointment.gallery_reference.image %}{{ appointment.gallery_reference.image.url }}{% else %}{{ appointment.gallery_reference.image_url }}{% endif %}" alt="Gallery Reference" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
-                                    {% elif not "gallery_" in appointment.reference_code %}
-                                        <img src="/media/{{ appointment.reference_code }}" alt="Custom Upload" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                        <img src="{{ appointment.gallery_reference.image_url }}" alt="Gallery Reference" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid var(--brand-primary); box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                    {% elif appointment.design_reference_image %}
+                                        <img src="{{ appointment.design_reference_image.url }}" alt="Custom Upload" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid var(--brand-primary); box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                    {% elif appointment.reference_code and "gallery_" in appointment.reference_code %}
+                                        <div class="p-2 border rounded bg-light small text-muted">Reference: {{ appointment.reference_code }}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -364,9 +366,9 @@
                                         
                                         <div class="mt-2">
                                             {% if appointment.gallery_reference %}
-                                                <img src="{% if appointment.gallery_reference.image %}{{ appointment.gallery_reference.image.url }}{% else %}{{ appointment.gallery_reference.image_url }}{% endif %}" alt="Gallery Reference" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
-                                            {% elif not "gallery_" in appointment.reference_code %}
-                                                <img src="/media/{{ appointment.reference_code }}" alt="Custom Upload" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                                <img src="{{ appointment.gallery_reference.image_url }}" alt="Gallery Reference" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
+                                            {% elif appointment.design_reference_image %}
+                                                <img src="{{ appointment.design_reference_image.url }}" alt="Custom Upload" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6;">
                                             {% endif %}
                                         </div>
                                     </div>
