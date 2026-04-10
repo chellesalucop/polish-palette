@@ -811,7 +811,7 @@ class NailDesign(models.Model):
     def image_url(self):
         """
         Favors local static for legacy images (restored folder) 
-        and Cloudinary for Sofia + future new uploads.
+        and Cloudinary for anything in the cloud gallery folder.
         """
         from django.templatetags.static import static
         import os
@@ -820,14 +820,14 @@ class NailDesign(models.Model):
 
         url = str(self.image.url)
 
-        # 1. Use Cloudinary for Sofia The First (ID: mqj9jqm09fpwttfjgh1e) and new HTTP uploads
-        if url.startswith('http') or 'mqj9jqm09fpwttfjgh1e' in url:
+        # 1. New Cloudinary Uploads & Sofia
+        # If it's a full URL, or belongs to the cloud gallery, or is specifically Sofia
+        if url.startswith('http') or 'artist_gallery' in url or 'mqj9jqm09fpwttfjgh1e' in url:
             if 'mqj9jqm09fpwttfjgh1e' in url and not url.startswith('http'):
-                 # Ensure Sofia works even if the path was mangled
                  return "https://res.cloudinary.com/dujnises2/image/upload/v1/images/gallery/mqj9jqm09fpwttfjgh1e.jpg"
             return url
 
-        # 2. Revert to local static for everything else (restored gallery folder)
+        # 2. Legacy Fallback (Local static folder)
         try:
             filename = os.path.basename(url)
             if filename:
