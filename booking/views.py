@@ -2541,8 +2541,13 @@ def get_design_recommendations(request):
             # If Google blocks the content due to Safety Settings, it throws an exception here.
             # We catch it, log it, and return random results so the user isn't stuck.
             logger.exception(f"Gemini API error or Safety Block triggered: {e}")
-            # Fallback to random designs on any failure
-            recommended_designs = random.sample(active_designs, min(len(active_designs), 3))
+            # Fallback to keyword match then random on any failure
+            keywords = [k for k in client_preference.lower().split() if len(k) > 2]
+            matched = [d for d in active_designs if any(k in d.title.lower() or k in d.tags.lower() for k in keywords)]
+            if matched:
+                recommended_designs = matched[:3]
+            else:
+                recommended_designs = random.sample(active_designs, min(len(active_designs), 3))
 
     data = [{
         'id': design.id, 
