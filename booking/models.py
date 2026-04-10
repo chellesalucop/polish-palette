@@ -797,7 +797,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = CloudinaryField('nail_designs', folder='nail_designs/')
+    image = CloudinaryField('nail_designs', folder='Polish Palette/artist_gallery/')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -823,8 +823,8 @@ class NailDesign(models.Model):
         # Rescue logic: If path points to the deleted images/gallery local folder
         if any(fix in url for fix in ['images/gallery/', 'static/gallery/']):
             filename = os.path.basename(url)
-            # Construct the manual Cloudinary path provided by the user in the latest example
-            return f"https://res.cloudinary.com/dujnises2/image/upload/nail_designs/{filename}"
+            # Construct the manual Cloudinary path: Polish Palette/artist_gallery/
+            return f"https://res.cloudinary.com/dujnises2/image/upload/Polish%20Palette/artist_gallery/{filename}"
             
         return url
 
