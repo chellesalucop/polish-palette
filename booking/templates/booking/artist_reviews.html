@@ -218,7 +218,8 @@
                     <div class="review-header">
                         <div class="profile-circle">
                             {% if review.client and review.client.profile_picture %}
-                                <img src="{{ review.client.profile_picture.url|safe }}" alt="{{ review.client.get_full_name }}">
+                                <img src="{{ review.client.profile_picture.url|safe }}" alt="{{ review.client.get_full_name }}"
+                                     onerror="handleProfilePictureError(this);">
                             {% else %}
                                 <img src="{% static 'images/pfp/default-avatar.png' %}" alt="Default Profile">
                             {% endif %}

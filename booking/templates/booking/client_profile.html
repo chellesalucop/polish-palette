@@ -37,7 +37,8 @@
                     <div class="profile-picture-section">
                         <div class="current-picture">
                             {% if user.profile_picture %}
-                                <img src="{{ user.profile_picture.url|safe }}" alt="Profile Picture" class="profile-img-large" id="currentProfilePic">
+                                <img src="{{ user.profile_picture.url|safe }}" alt="Profile Picture" class="profile-img-large" id="currentProfilePic"
+                                     onerror="handleProfilePictureError(this);">
                             {% else %}
                                 <img src="{% static 'images/pfp/default-avatar.png' %}" alt="Profile Picture" class="profile-img-large" id="currentProfilePic">
                             {% endif %}

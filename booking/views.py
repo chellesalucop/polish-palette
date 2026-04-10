@@ -475,7 +475,8 @@ def dashboard_view(request):
         upcoming_appointment.is_within_48_hours = (appt_dt - now).total_seconds() < 48 * 3600
     
     services = Service.objects.filter(is_active=True)[:4]
-    appointments = user_appointments.filter(status__in=['Finished', 'Cancelled']).order_by('-date', '-time')
+    # Include recent appointments (all statuses) for better visibility of new bookings
+    appointments = user_appointments.order_by('-date', '-time')
     
     appointments_json = []
     for appointment in appointments:
@@ -549,9 +550,17 @@ def profile_picture_view(request):
         try:
             request.user.profile_picture = profile_picture
             request.user.save()
+            
+            # Debug: Log the Cloudinary URL
+            logger.info(f"Profile picture uploaded successfully. URL: {request.user.profile_picture.url}")
+            
+            # Force refresh the user object to get the latest Cloudinary URL
+            request.user.refresh_from_db()
+            
             messages.success(request, 'Profile picture updated successfully!')
         except Exception as e:
-            messages.error(request, 'An error occurred while uploading your profile picture.')
+            logger.error(f"Profile picture upload error: {str(e)}")
+            messages.error(request, f'An error occurred while uploading your profile picture: {str(e)}')
     
     return redirect('profile')
 
@@ -1019,11 +1028,11 @@ def booking_create_view(request):
                 return JsonResponse({
                     'success': True,
                     'message': 'Booking request submitted successfully! Waiting for artist approval.',
-                    'redirect_url': '/appointments/'
+                    'redirect_url': '/dashboard/'
                 })
             
             messages.success(request, 'Your booking request has been submitted and is waiting for artist approval!')
-            return redirect('appointments_list')
+            return redirect('dashboard')
         except Exception as e:
             # Return JSON response for AJAX requests
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
