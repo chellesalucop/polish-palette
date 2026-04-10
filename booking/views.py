@@ -96,7 +96,7 @@ def get_genai_client():
     try:
         # Try the older but more stable generativeai SDK first
         import google.generativeai as genai_legacy
-        genai_legacy.configure(api_key=api_key)
+        genai_legacy.configure(api_key=api_key, transport='rest')
         genai_client = genai_legacy
         logger.info("Gemini initialized using google.generativeai SDK")
     except (ImportError, Exception) as e:
