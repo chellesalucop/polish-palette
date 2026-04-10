@@ -812,24 +812,32 @@ class NailDesign(models.Model):
         """
         Returns the Cloudinary URL. 
         If a legacy local path is found in the database, it is automatically 
-        mapped to the Cloudinary 'Polish Palette/artist_gallery' path.
+        mapped to the correct Cloudinary folder.
         """
         import os
         if not self.image:
-            # Fallback for empty designs
             return "/static/images/services/default-service.jpg"
 
         url = str(self.image.url)
 
-        # If it's already a full Cloudinary URL, return it
+        # 1. If it's already a full Cloudinary URL (new successful uploads)
         if url.startswith('http'):
             return url
 
-        # Transformation Logic: Convert legacy local path strings to Cloudinary URLs
+        # 2. Rescue Logic: Map legacy "images/gallery/" paths to the Cloudinary migration folder
+        if 'images/gallery/' in url:
+            try:
+                filename = os.path.basename(url)
+                if filename:
+                    # Point to the specific folder found on your Cloudinary (images/gallery)
+                    return f"https://res.cloudinary.com/dujnises2/image/upload/v1/images/gallery/{filename}"
+            except Exception:
+                pass
+
+        # 3. Final Fallback: Try the main artist_gallery folder for other legacy items
         try:
             filename = os.path.basename(url)
             if filename:
-                # Point to your manual Cloudinary migration folder
                 return f"https://res.cloudinary.com/dujnises2/image/upload/v1/Polish%20Palette/artist_gallery/{filename}"
         except Exception:
             pass
