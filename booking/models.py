@@ -797,7 +797,7 @@ class ServiceHistory(models.Model):
     
 class NailDesign(models.Model):
     title = models.CharField(max_length=100)
-    image = CloudinaryField('nail_designs', folder='Polish Palette/artist_gallery/')
+    image = CloudinaryField('nail_designs', folder='images/gallery/')
     tags = models.CharField(max_length=200, help_text="Comma-separated tags (e.g., minimalist, acrylic, gel, floral)")
     
     # NEW: Links the design to a specific service
@@ -809,24 +809,19 @@ class NailDesign(models.Model):
 
     @property
     def image_url(self):
-        """
-        Returns the Cloudinary URL. If the database still contains legacy local paths 
-        (from the deleted gallery folder), it automatically redirects them to the 
-        new Cloudinary 'artist_gallery' folder.
-        """
-        if not self.image:
-            return ''
-            
+        from django.templatetags.static import static
         import os
-        url = str(self.image.url)
-        
-        # Rescue logic: If path points to the deleted images/gallery local folder
-        if any(fix in url for fix in ['images/gallery/', 'static/gallery/']):
-            filename = os.path.basename(url)
-            # Construct the manual Cloudinary path: Polish Palette/artist_gallery/
-            return f"https://res.cloudinary.com/dujnises2/image/upload/Polish%20Palette/artist_gallery/{filename}"
-            
-        return url
+
+        if self.image:
+            try:
+                # Always extract filename from the URL (whether http or local path)
+                filename = os.path.basename(str(self.image.url))
+                if filename:
+                    return static(f'images/gallery/{filename}')
+            except Exception:
+                pass
+                
+        return ''
 
     @property
     def get_tag_list(self):
