@@ -281,15 +281,16 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Content Security Policy to allow Cloudinary images
+# Content Security Policy settings (Consolidated)
 CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net")
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
-CSP_IMG_SRC = ("'self'", "data:", "https:", "https://res.cloudinary.com")
-CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
-CSP_CONNECT_SRC = ("'self'", "wss:", "https:")
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://accounts.google.com")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com")
+CSP_IMG_SRC = ("'self'", "data:", "https://res.cloudinary.com", "https:")
+CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com")
+CSP_CONNECT_SRC = ("'self'", "wss:", "https:", "https://accounts.google.com", "https://cdn.jsdelivr.net")
+CSP_FRAME_ANCESTORS = ("'none'",)
 
-# Custom CSP header
+# Custom CSP header for SecurityMiddleware visibility (if needed)
 SECURE_CONTENT_SECURITY_POLICY = {
     'default-src': CSP_DEFAULT_SRC,
     'script-src': CSP_SCRIPT_SRC,
@@ -315,14 +316,7 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 # Email Security (prevent email injection)
 EMAIL_SUBJECT_PREFIX = '[Polish Palette] '
 
-# Content Security Policy (additional layer)
-CSP_DEFAULT_SRC = "'self'"
-CSP_SCRIPT_SRC = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com"
-CSP_STYLE_SRC = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com"
-CSP_FONT_SRC = "'self' https://fonts.gstatic.com https://cdn.jsdelivr.net"
-CSP_IMG_SRC = "'self' data:"
-CSP_CONNECT_SRC = "'self' https://accounts.google.com https://cdn.jsdelivr.net"
-CSP_FRAME_ANCESTORS = "'none'"
+
 
 # Disable Django's built-in debug toolbar in production
 if DEBUG:

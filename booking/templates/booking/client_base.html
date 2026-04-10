@@ -15,6 +15,14 @@
     <link rel="stylesheet" href="{% static 'css/booking_pipeline.css' %}">
 
     {% block extra_css %}{% endblock %}
+    <!-- Early definition of error handlers to prevent ReferenceError on fast-failing images -->
+    <script>
+        function handleProfilePictureError(img) {
+            console.warn('Profile picture failed to load, falling back to default.');
+            img.onerror = null; // Prevent infinite loop
+            img.src = "{% static 'images/default-profile.png' %}";
+        }
+    </script>
 </head>
 <body>
 
@@ -797,11 +805,6 @@ document.addEventListener('DOMContentLoaded', function() {
     connectBookingWebSocket();
 });
 
-// Function to handle profile picture loading errors
-function handleProfilePictureError(img) {
-    img.onerror = null; // Prevent infinite loop
-    img.src = '/static/images/pfp/default-avatar.png';
-}
 </script>
 
 {% include 'booking/ai_recommender_bubble.html' %}

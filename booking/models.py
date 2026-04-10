@@ -777,8 +777,23 @@ class NailDesign(models.Model):
 
     @property
     def image_url(self):
+        """
+        Smart URL fetcher:
+        1. If it's a Cloudinary URL, return it.
+        2. If it's a local path in the DB, look for it in the 'static/images/gallery' folder.
+        """
         if self.image and hasattr(self.image, 'url'):
-            return self.image.url
+            url = str(self.image.url)
+            # If it's a Cloudinary hosted URL (starts with http)
+            if url.startswith('http'):
+                return url
+            
+            # If it's a local path (starts with /media/ or is relative)
+            # Fallback to the static gallery folder for core designs
+            from django.templatetags.static import static
+            import os
+            filename = os.path.basename(url)
+            return static(f'images/gallery/{filename}')
         return ''
 
     @property

@@ -631,7 +631,7 @@ class DynamicBookingSystem {
         })
         .then(data => {
             if (data.success) {
-                window.location.href = '/appointments/';
+                window.location.href = data.redirect_url || '/dashboard/';
             } else {
                 alert(data.message || 'Booking failed. Please try again.');
                 if (submitBtn) {
