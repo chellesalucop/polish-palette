@@ -19,6 +19,8 @@ import random
 import json
 import time
 import logging
+import re
+import html
 
 logger = logging.getLogger(__name__)
 
