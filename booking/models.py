@@ -814,12 +814,17 @@ class NailDesign(models.Model):
         """
         if not self.image:
             return "/static/images/services/default-service.jpg"
-            
+
         url = str(self.image.url)
-        if url.startswith('http'):
+        
+        # 1. Force HTTPS (Prevents browsers from blocking 'unsecure' http images)
+        if url.startswith('http:'):
+            url = url.replace('http:', 'https:', 1)
+            
+        if url.startswith('https:'):
             return url
             
-        # If relative (common in local dev), force the Cloudinary BASE URL
+        # 2. If relative, force the Cloudinary SECURE base URL
         return f"https://res.cloudinary.com/dujnises2/image/upload/{url}"
 
     @property
