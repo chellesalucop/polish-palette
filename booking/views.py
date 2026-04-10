@@ -2508,12 +2508,12 @@ def get_design_recommendations(request):
             client = get_genai_client()
             if hasattr(client, 'models'):
                 response = client.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='gemini-1.5-flash',
                     contents=prompt
                 )
                 ai_text = response.text.strip()
             else:
-                model = client.GenerativeModel('gemini-2.5-flash')
+                model = client.GenerativeModel('gemini-1.5-flash')
                 response = model.generate_content(
                     prompt
                 )
