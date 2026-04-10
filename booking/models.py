@@ -810,43 +810,28 @@ class NailDesign(models.Model):
     @property
     def image_url(self):
         """
-        Returns the Cloudinary URL. 
-        If a legacy local path is found in the database, it is automatically 
-        mapped to the correct Cloudinary folder.
+        Favors local static for legacy images (restored folder) 
+        and Cloudinary for Sofia + future new uploads.
         """
+        from django.templatetags.static import static
         import os
         if not self.image:
             return "/static/images/services/default-service.jpg"
 
         url = str(self.image.url)
 
-        # 1. If it's already a full Cloudinary URL (new successful uploads)
-        if url.startswith('http'):
+        # 1. Use Cloudinary for Sofia The First (ID: mqj9jqm09fpwttfjgh1e) and new HTTP uploads
+        if url.startswith('http') or 'mqj9jqm09fpwttfjgh1e' in url:
+            if 'mqj9jqm09fpwttfjgh1e' in url and not url.startswith('http'):
+                 # Ensure Sofia works even if the path was mangled
+                 return "https://res.cloudinary.com/dujnises2/image/upload/v1/images/gallery/mqj9jqm09fpwttfjgh1e.jpg"
             return url
 
-        # 2. Rescue Logic: Map legacy "images/gallery/" paths to the Cloudinary migration folder
-        if 'images/gallery/' in url:
-            try:
-                filename = os.path.basename(url)
-                if filename:
-                    # Point to the specific folder found on your Cloudinary (images/gallery)
-                    return f"https://res.cloudinary.com/dujnises2/image/upload/v1/images/gallery/{filename}"
-            except Exception:
-                pass
-
-        # 3. Folder Fallback: Try the manual migration folder
+        # 2. Revert to local static for everything else (restored gallery folder)
         try:
             filename = os.path.basename(url)
             if filename:
-                return f"https://res.cloudinary.com/dujnises2/image/upload/v1/Polish%20Palette/artist_gallery/{filename}"
-        except Exception:
-            pass
-
-        # 4. Root Fallback: Try the root upload folder for renamed items
-        try:
-            filename = os.path.basename(url)
-            if filename:
-                return f"https://res.cloudinary.com/dujnises2/image/upload/v1/{filename}"
+                return static(f'images/gallery/{filename}')
         except Exception:
             pass
                 
