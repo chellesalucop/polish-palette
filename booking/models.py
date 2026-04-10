@@ -283,7 +283,27 @@ class Service(models.Model):
     )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def image_url(self):
+        """Returns a valid URL for the service image, with multiple fallbacks."""
+        if self.image and hasattr(self.image, 'url'):
+            url = str(self.image.url)
+            if url.startswith('http'):
+                return url
+        
+        # Static Fallback based on category
+        from django.templatetags.static import static
+        if self.category == 'gel_polish':
+            return static('images/services/cardGelpolish.jpg')
+        elif self.category in ['extensions', 'soft_gel_extensions']:
+            return static('images/services/cardExtension.jpg')
+        elif self.category == 'removal':
+            return static('images/services/cardRemoval.jpg')
+        
+        return static('images/services/default-service.jpg')
+
     class Meta:
         ordering = ['category', 'name']
     
@@ -771,16 +791,14 @@ class NailDesign(models.Model):
     
     is_active = models.BooleanField(default=True, help_text="Show in AI recommender?")
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.title
+    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def image_url(self):
         """
         Smart URL fetcher:
         1. If it's a Cloudinary URL, return it.
-        2. If it's a local path in the DB, look for it in the 'static/images/gallery' folder.
+        2. If it's a local filename, prepend the static gallery path.
         """
         if self.image and hasattr(self.image, 'url'):
             url = str(self.image.url)
@@ -788,12 +806,12 @@ class NailDesign(models.Model):
             if url.startswith('http'):
                 return url
             
-            # If it's a local path (starts with /media/ or is relative)
-            # Fallback to the static gallery folder for core designs
+            # If it's a local filename from migrations
             from django.templatetags.static import static
             import os
             filename = os.path.basename(url)
             return static(f'images/gallery/{filename}')
+        
         return ''
 
     @property

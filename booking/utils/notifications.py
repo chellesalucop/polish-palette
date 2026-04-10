@@ -48,6 +48,7 @@ def notify_user_pair(request, receiver_email, subject, toast_message, email_temp
     def send_email_task():
         try:
             # Render templates
+            context['cloudinary_cloud_name'] = settings.CLOUDINARY_STORAGE.get('CLOUD_NAME')
             html_body = render_to_string(f'emails/{email_template}.html', context)
             plain_body = context.get('plain_text', toast_message)
 
@@ -59,23 +60,7 @@ def notify_user_pair(request, receiver_email, subject, toast_message, email_temp
             )
             email.attach_alternative(html_body, 'text/html')
 
-            # Handle logo attachment if it exists
-            logo_path = os.path.join(settings.BASE_DIR, 'booking/static/images/logo.png')
-            if os.path.exists(logo_path):
-                try:
-                    with open(logo_path, 'rb') as logo_file:
-                        logo_content = logo_file.read()
-                    
-                    logo_mime = MIMEImage(logo_content)
-                    logo_mime.add_header('Content-ID', '<polishpalattelogo>')
-                    logo_mime.add_header('Content-Disposition', 'inline', filename='logo.png')
-                    email.attach(logo_mime)
-                except Exception as logo_err:
-                    logger.warning(f"Failed to attach logo to email: {str(logo_err)}")
-
             # Send the email
-            # We set fail_silently=False here because it runs in a background thread
-            # and we want the error captured in our try/except block.
             email.send(fail_silently=False)
             logger.info(f"Email '{subject}' successfully sent to {receiver_email}")
 

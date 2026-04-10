@@ -273,7 +273,7 @@
                             <div class="gallery-grid" id="galleryGrid">
                                 {% for design in gallery_designs %}
                                     <div class="gallery-item" data-image-id="{{ design.id }}" data-design-title="{{ design.title }}">
-                                        <img src="{{ design.image.url|default:design.image_url }}" alt="{{ design.title }}">
+                                        <img src="{{ design.image_url }}" alt="{{ design.title }}">
                                     </div>
                                 {% empty %}
                                     <p style="color: #adb5bd; font-style: italic; grid-column: 1 / -1; text-align: center;">No gallery designs available yet.</p>

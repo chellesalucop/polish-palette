@@ -43,19 +43,7 @@
                 {% for service in services %}
                 <div class="service-card {% if service.badge %}{{ service.badge }}-tier{% endif %}" data-category="{{ service.category }}">
                     <div class="service-image">
-                        {% if service.image %}
-                            <img src="{{ service.image.url|safe }}" alt="{{ service.name }}">
-                        {% else %}
-                            {% if service.category == 'gel_polish' %}
-                                <img src="{% static 'images/services/cardGelpolish.jpg' %}" alt="{{ service.name }}">
-                            {% elif service.category == 'extensions' or service.category == 'soft_gel_extensions' %}
-                                <img src="{% static 'images/services/cardExtension.jpg' %}" alt="{{ service.name }}">
-                            {% elif service.category == 'removal' %}
-                                <img src="{% static 'images/services/cardRemoval.jpg' %}" alt="{{ service.name }}">
-                            {% else %}
-                                <img src="{% static 'images/services/default-service.jpg' %}" alt="{{ service.name }}">
-                            {% endif %}
-                        {% endif %}
+                        <img src="{{ service.image_url }}" alt="{{ service.name }}">
                         <div class="service-overlay">
                             <span class="service-price">₱{{ service.price }}</span>
                             {% if service.badge %}
