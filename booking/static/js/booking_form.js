@@ -38,7 +38,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (this.currentStep === 3) {
                 const referenceType = document.getElementById('referenceType')?.value;
                 console.log(`Step 3 - Reference Type: "${referenceType}"`);
-                if (!referenceType) {
+                // Allow "No" selection - if no reference type is selected, it's valid
+                // Only fail validation if we're in a state that requires a reference
+                const isRemovalService = document.querySelector('.service-category.selected')?.dataset.category === 'removal';
+                if (!referenceType && !isRemovalService) {
                     console.log('Step 3 validation failed: No reference type selected');
                     return false;
                 }

@@ -44,7 +44,7 @@
                 <div class="service-card {% if service.badge %}{{ service.badge }}-tier{% endif %}" data-category="{{ service.category }}">
                     <div class="service-image">
                         {% if service.image %}
-                            <img src="{{ service.image.url }}" alt="{{ service.name }}">
+                            <img src="{{ service.image.url|safe }}" alt="{{ service.name }}">
                         {% else %}
                             {% if service.category == 'gel_polish' %}
                                 <img src="{% static 'images/services/cardGelpolish.jpg' %}" alt="{{ service.name }}">

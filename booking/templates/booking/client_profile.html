@@ -294,9 +294,28 @@ document.getElementById('profilePictureForm').addEventListener('submit', functio
             showToast('Profile picture updated successfully!', 'success');
             
             // Refresh the profile picture with cache busting
-            const profileImg = document.getElementById('currentProfilePic');
             const timestamp = new Date().getTime();
-            profileImg.src = data.image_url + '?t=' + timestamp;
+            const imageUrl = data.image_url + '?t=' + timestamp;
+            
+            // Update profile picture on current page
+            const profileImg = document.getElementById('currentProfilePic');
+            if (profileImg) {
+                profileImg.src = imageUrl;
+            }
+            
+            // Update navbar avatar (find all profile pictures in navbar)
+            const navbarAvatars = document.querySelectorAll('.nav-avatar-img');
+            navbarAvatars.forEach(avatar => {
+                avatar.src = imageUrl;
+            });
+            
+            // Update any other profile pictures on the page
+            const allProfilePics = document.querySelectorAll('img[alt="Profile"], .profile-img-large, .nav-avatar-img');
+            allProfilePics.forEach(img => {
+                if (img.src !== imageUrl) {
+                    img.src = imageUrl;
+                }
+            });
         } else {
             // Show error message
             showToast(data.message || 'Upload failed', 'error');
