@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.core.mail import send_mail
+from .adapter import safe_send_html_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import random
 import json
