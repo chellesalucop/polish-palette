@@ -1,0 +1,180 @@
+/* ===============================
+   FORMS & AUTH STYLES
+=================================*/
+/* Labels */
+.form-label {
+    color: var(--red-violet);
+    font-weight: 700;
+}
+
+/* Inputs */
+.custom-input {
+    background-color: var(--ecru-wealth);
+    border: 1px solid var(--red-violet);
+}
+
+.custom-input:focus {
+    background-color: var(--ecru-wealth);
+    border: 1px solid var(--red-violet);
+    box-shadow: none;
+}
+
+.custom-input::placeholder {
+    color: var(--olive-beige);
+    opacity: 1;
+}
+
+/* Left Section */
+.auth-left {
+    background-color: var(--white-choco);
+}
+
+.title-text {
+    color: var(--red-violet);
+}
+
+.subtitle-text {
+    color: #6E4F3A;
+}
+
+/* Right Section */
+.auth-right {
+    height: 100%;
+    overflow: hidden; 
+}
+
+/* Buttons */
+.primary-btn {
+    background-color: var(--red-violet);
+    color: var(--eon-white);
+    border: none;
+}
+
+.primary-btn:hover {
+    background-color: #742534;
+}
+
+.google-btn {
+    background-color: var(--bistre-brown);
+    color: var(--eon-white);
+    border: none;
+}
+
+.google-btn:hover {
+    background-color: #6e6415;
+}
+
+/* Terms */
+.form-check-label,
+.form-check-label a {
+    color: var(--bistre-brown);
+    text-decoration: none;
+}
+
+.form-check-label a:hover {
+    text-decoration: underline;
+}
+
+.form-check-input {
+    border: 1.5px solid var(--red-violet);
+}
+
+.form-check-input:checked {
+    background-color: var(--red-violet);
+    border-color: var(--red-violet);
+}
+
+.form-check-input:focus {
+    box-shadow: none;
+    border-color: var(--red-violet);
+}
+
+/* Account Text */
+.account-text {
+    color: var(--bistre-brown);
+}
+
+.account-link {
+    color: var(--red-violet);
+    text-decoration: none;
+}
+
+.account-link:hover {
+    text-decoration: underline;
+}
+
+/* Forgot Password */
+.forgot-link {
+    color: var(--bistre-brown);
+    text-decoration: none;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--bistre-brown)
+}
+
+/* Removed redundant pseudo-elements as we now use Bootstrap Icons */
+.password-requirements li.text-success i {
+    color: #198754;
+}
+.password-requirements li.text-danger i {
+    color: #dc3545;
+}
+
+/* Divider */
+.divider {
+    position: relative;
+    text-align: center;
+}
+
+.divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--red-violet);
+    z-index: 0;
+}
+
+.divider span {
+    position: relative;
+    background-color: var(--white-choco);
+    padding: 0 15px;
+    color: var(--bistre-brown);
+    font-size: 14px;
+    z-index: 1;
+}
+
+/* Image */
+.signup-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+
+/* Fullscreen Control */
+@media (min-width: 768px) {
+    .full-height-row {
+        height: 100vh;
+        overflow: hidden;
+    }
+}
+
+.full-height-row > [class^="col-"] {
+    display: flex;
+}
