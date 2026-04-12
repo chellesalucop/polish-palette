@@ -147,9 +147,20 @@ def login_view(request):
             clear_otp_rate_limit(request, email)
             
             # Send the OTP via email
-            subject = "Two-Factor Authentication Code - Polish Palette"
-            message = f"Hello {user.first_name},\n\nYour 2FA code is: {otp_obj.otp}\n\nThis code expires in 2 minutes.\n\nPolish Palette Team\n"
-            email_sent = safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            subject = "Two-Factor Authentication Code"
+            context = {
+                'user_name': user.first_name,
+                'otp_code': otp_obj.otp,
+                'subject': subject
+            }
+            email_sent = safe_send_html_mail(
+                subject, 
+                'emails/two_factor_otp.html', 
+                context, 
+                settings.DEFAULT_FROM_EMAIL, 
+                [email], 
+                fail_silently=False
+            )
             
             if not email_sent:
                 print(f"DEBUG: Email failed, but OTP code is: {otp_obj.otp}")
@@ -638,22 +649,20 @@ def forgot_password_email(request):
             client = Client.objects.get(email=email)
             otp_obj = PasswordResetOTP.generate_otp(email)
             
-            subject = 'Password Reset OTP - Nail Booking'
-            message = f'''
-Hello {client.first_name},
-
-You requested a password reset for your Nail Booking account.
-
-Your OTP code is: {otp_obj.otp}
-
-This OTP will expire in 2 minutes. Please do not share this code with anyone.
-
-If you did not request this password reset, please ignore this email.
-
-Thank you,
-Nail Booking Team
-            '''
-            safe_send_mail(subject, message, 'noreply@gmail.com', [email], fail_silently=False)
+            subject = 'Password Reset Code'
+            context = {
+                'user_name': client.first_name,
+                'otp_code': otp_obj.otp,
+                'subject': subject
+            }
+            safe_send_html_mail(
+                subject, 
+                'emails/password_reset_otp.html', 
+                context, 
+                settings.DEFAULT_FROM_EMAIL, 
+                [email], 
+                fail_silently=False
+            )
             
             request.session['reset_email'] = email
             messages.success(request, 'OTP has been sent to your email address.')
@@ -1760,21 +1769,20 @@ def artist_approve_reject_view(request):
 
             otp_obj = PasswordResetOTP.generate_otp(email)
 
-            subject = 'Password Reset OTP - Polish Palette (Artist)'
-            message = f'''Hello {client.first_name},
-
-You requested a password reset for your Polish Palette artist account.
-
-Your OTP code is: {otp_obj.otp}
-
-This OTP will expire in 2 minutes. Please do not share this code with anyone.
-
-If you did not request this password reset, please ignore this email.
-
-Thank you,
-Polish Palette Team
-            '''
-            safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            subject = 'Password Reset Code (Artist)'
+            context = {
+                'user_name': client.first_name,
+                'otp_code': otp_obj.otp,
+                'subject': subject
+            }
+            safe_send_html_mail(
+                subject, 
+                'emails/password_reset_otp.html', 
+                context, 
+                settings.DEFAULT_FROM_EMAIL, 
+                [email], 
+                fail_silently=False
+            )
 
             request.session['artist_reset_email'] = email
             messages.success(request, 'OTP has been sent to your email address.')

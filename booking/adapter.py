@@ -3,6 +3,7 @@ from allauth.socialaccount.models import SocialLogin
 from allauth.exceptions import ImmediateHttpResponse
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 import logging
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,63 @@ def safe_send_mail(subject, message, from_email, recipient_list, fail_silently=F
     # Return True immediately (we'll log the actual result asynchronously)
     logger.info("Email sending started in background thread")
     return True
+
+def safe_send_html_mail(subject, template_name, context, from_email, recipient_list, fail_silently=False, max_retries=3):
+    """Send HTML email with retry logic for Gmail connectivity issues"""
+    import time
+    import socket
+    import threading
+    import queue
+    from django.core.mail import EmailMultiAlternatives
+    
+    # Use a queue to get the result back from the thread
+    result_queue = queue.Queue()
+    
+    def send_email_thread():
+        try:
+            # Render HTML template
+            html_content = render_to_string(template_name, context)
+            
+            # Create email with HTML content
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body="",  # Plain text will be generated from HTML
+                from_email=from_email,
+                to=recipient_list
+            )
+            email.attach_alternative(html_content, "text/html")
+            
+            for attempt in range(max_retries):
+                try:
+                    email.send()
+                    result_queue.put(True)
+                    return
+                except (socket.error, ConnectionError, OSError) as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"HTML Email attempt {attempt + 1} failed: {e}. Retrying in 2 seconds...")
+                        time.sleep(2)
+                        continue
+                    else:
+                        logger.error(f"Failed to send HTML email after {max_retries} attempts: {e}")
+                        result_queue.put(False)
+                        return
+                except Exception as e:
+                    logger.error(f"Unexpected error sending HTML email: {e}")
+                    result_queue.put(False)
+                    return
+        except Exception as e:
+            logger.error(f"Error rendering HTML email template: {e}")
+            result_queue.put(False)
+            return
+    
+    # Start the email sending in a separate thread
+    thread = threading.Thread(target=send_email_thread)
+    thread.daemon = True  # Daemon thread won't prevent process exit
+    thread.start()
+    
+    # Return True immediately (we'll log the actual result asynchronously)
+    logger.info("HTML Email sending started in background thread")
+    return True
 from django.conf import settings
 from django.shortcuts import redirect
 from .models import TwoFactorOTP
@@ -84,37 +142,20 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         print(f"DEBUG: Generated OTP {otp} for {email}")
 
         # Send appropriate email message
-        subject = "Two-Factor Authentication Code - Polish Palette"
-        if is_new_user:
-            message = f"""Hello {first_name},
-
-Welcome to Polish Palette! 
-
-To complete your Google OAuth registration and secure your account, please enter the following verification code:
-
-Your 2FA code is: {otp}
-
-This code expires in 10 minutes.
-
-If you did not create this account, please ignore this email.
-
-Polish Palette Team
-"""
-        else:
-            message = f"""Hello {first_name},
-
-You are logging into your Polish Palette account via Google.
-
-Your 2FA code is: {otp}
-
-This code expires in 10 minutes.
-
-If you did not attempt to login, please secure your account immediately.
-
-Polish Palette Team
-"""
-        
-        email_sent = safe_send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+        subject = "Two-Factor Authentication Code"
+        context = {
+            'user_name': first_name,
+            'otp_code': otp,
+            'subject': subject
+        }
+        email_sent = safe_send_html_mail(
+            subject, 
+            'emails/two_factor_otp.html', 
+            context, 
+            settings.DEFAULT_FROM_EMAIL, 
+            [email], 
+            fail_silently=False
+        )
         
         if not email_sent:
             print(f"DEBUG: Email failed, but OTP code is: {otp}")

@@ -1,0 +1,24 @@
+{% extends "emails/base_email.html" %}
+{% block content %}
+<h2>Two-Factor Authentication</h2>
+<p>Hello {{ user_name }},</p>
+<p>For your security, we've sent a one-time password to complete your login to Polish Palette.</p>
+
+<div class="detail-card" style="text-align: center; background: linear-gradient(135deg, #867B18 0%, #B7AA7A 100%); color: white;">
+  <p style="margin: 0 0 10px; font-size: 14px; opacity: 0.9;">Your verification code is:</p>
+  <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 10px 0; font-family: 'Courier New', monospace;">{{ otp_code }}</div>
+  <p style="margin: 10px 0 0; font-size: 13px; opacity: 0.8;">This code expires in 2 minutes</p>
+</div>
+
+<p style="color: #dc3545; font-weight: 600;"><i class="bi bi-shield-check"></i> Security Notice:</p>
+<ul style="color: #666; font-size: 14px; margin: 10px 0 20px;">
+  <li>Never share this code with anyone</li>
+  <li>Polish Palette will never ask for your code</li>
+  <li>This code can only be used once</li>
+</ul>
+
+<p>If you didn't request this code, please ignore this email or contact our support team immediately.</p>
+
+<hr class="divider">
+<p style="font-size: 13px; color: #888;">Thank you for choosing Polish Palette!</p>
+{% endblock %}
