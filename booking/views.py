@@ -1129,6 +1129,8 @@ def services_view(request):
         name__exact='Gel Polish - Full'
     ).exclude(
         name__exact='Gel Polish - Minimal'
+    ).exclude(
+        category='extensions'
     )
     selected_category = request.GET.get('category', 'all')
     
