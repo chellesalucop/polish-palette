@@ -242,36 +242,6 @@
             <button class="modal-btn secondary-btn" id="closeModalBtn">Close</button>
         </div>
         
-        <!-- File Upload Section -->
-        <div class="upload-column">
-            <h2 class="section-title">Upload Files</h2>
-            <div class="upload-card">
-                <form method="post" action="{% url 'client_file_upload' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="file" class="form-label">Choose File:</label>
-                        <input type="file" name="file" id="file" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="file_type" class="form-label">File Type:</label>
-                        <select name="file_type" id="file_type" class="form-control">
-                            <option value="payment_receipt">Payment Receipt</option>
-                            <option value="design_reference">Design Reference</option>
-                            <option value="nail_art">Nail Art</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="reference_code" class="form-label">Reference Code (Optional):</label>
-                        <input type="text" name="reference_code" id="reference_code" class="form-control" placeholder="Enter reference code if applicable">
-                    </div>
-                    <button type="submit" class="upload-btn">
-                        <i class="bi bi-cloud-upload"></i> Upload File
-                    </button>
-                </form>
-            </div>
-        </div>
-        
     </div>
 </div>
 
