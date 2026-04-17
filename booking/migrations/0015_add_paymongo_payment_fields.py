@@ -6,14 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('booking', '0014_client_monthly_booking_limit'),
+        ('booking', '0013_naildesign_updated_at_service_updated_at'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='client',
-            name='monthly_booking_limit',
-        ),
         migrations.AddField(
             model_name='appointment',
             name='payment_amount',
