@@ -24,17 +24,13 @@ def paymongo_webhook(request):
         
         # Get the signature from headers
         signature_header = request.headers.get('Paymongo-Signature')
-        if not signature_header:
-            logger.error("No PayMongo signature found in headers")
-            logger.info(f"Available headers: {dict(request.headers)}")
-        else:
+        logger.info(f"Signature header present: {bool(signature_header)}")
+        
+        if signature_header:
             # Verify the signature
             paymongo = PayMongoService()
-            if not paymongo.verify_webhook_signature(payload, signature_header):
-                logger.error("Invalid webhook signature - but continuing for debugging")
-                # Continue processing even if signature fails (for debugging)
-            else:
-                logger.info("Webhook signature verified successfully")
+            is_valid = paymongo.verify_webhook_signature(payload, signature_header)
+            logger.info(f"Signature verification result: {is_valid}")
         
         # Parse the webhook data
         webhook_data = json.loads(payload)
@@ -45,31 +41,46 @@ def paymongo_webhook(request):
         event_type = attributes.get('type')
         
         logger.info(f"Received webhook event type: {event_type}")
-        logger.info(f"Full event data: {json.dumps(webhook_data, indent=2)[:1000]}")
         
         # Handle different event types
         if event_type == 'checkout_session.payment.paid':
             logger.info("Processing checkout_session.payment.paid event")
-            handle_checkout_session_paid(webhook_data)
+            try:
+                handle_checkout_session_paid(webhook_data)
+                logger.info("checkout_session.payment.paid processed successfully")
+            except Exception as handler_error:
+                logger.error(f"Error in handle_checkout_session_paid: {str(handler_error)}", exc_info=True)
         elif event_type == 'payment.paid':
             logger.info("Processing payment.paid event")
-            handle_payment_paid(webhook_data)
+            try:
+                handle_payment_paid(webhook_data)
+                logger.info("payment.paid processed successfully")
+            except Exception as handler_error:
+                logger.error(f"Error in handle_payment_paid: {str(handler_error)}", exc_info=True)
         elif event_type == 'payment.failed':
             logger.info("Processing payment.failed event")
-            handle_payment_failed(webhook_data)
+            try:
+                handle_payment_failed(webhook_data)
+                logger.info("payment.failed processed successfully")
+            except Exception as handler_error:
+                logger.error(f"Error in handle_payment_failed: {str(handler_error)}", exc_info=True)
         else:
             logger.warning(f"Unhandled event type: {event_type}")
         
-        # Return success response
+        # ALWAYS return 200 success so PayMongo doesn't retry
         return JsonResponse({
             'status': 'success',
-            'message': 'Webhook received successfully',
+            'message': 'Webhook processed',
             'event_type': event_type
         })
         
     except Exception as e:
         logger.error(f"Webhook processing error: {str(e)}", exc_info=True)
-        return JsonResponse({'error': str(e)}, status=500)
+        # Still return 200 to prevent PayMongo retries, but log the error
+        return JsonResponse({
+            'status': 'error_logged',
+            'message': 'Error occurred but acknowledged'
+        }, status=200)
 
 
 def handle_checkout_session_paid(webhook_data):
