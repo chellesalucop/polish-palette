@@ -105,13 +105,15 @@ class PayMongoPayment {
         return {
             service_category: selectedService ? selectedService.dataset.category : '',
             complexity_level: selectedComplexity ? selectedComplexity.dataset.complexity : '',
-            artist_id: artist ? artist.value : '',
-            appointment_date: document.getElementById('appointment_date').value,
-            appointment_time: document.getElementById('appointment_time').value,
-            reference_type: referenceOption ? referenceOption.dataset.reference : '',
-            gallery_image_id: document.getElementById('galleryImageId').value,
-            custom_art_description: document.getElementById('designNote').value,
-            reference_file: referenceFile && referenceFile.files.length > 0 ? referenceFile.files[0].name : null
+            artist_id: artist ? artist.value : null,
+            date: document.getElementById('appointment_date').value || null,
+            time: document.getElementById('appointment_time').value || null,
+            design_preferences: {
+                reference_type: referenceOption ? referenceOption.dataset.reference : '',
+                gallery_image_id: document.getElementById('galleryImageId').value || '',
+                custom_art_description: document.getElementById('designNote').value || ''
+            },
+            add_ons: []
         };
     }
     
