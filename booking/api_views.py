@@ -104,7 +104,7 @@ def create_checkout_session(request):
             style_complexity=booking_data.get('complexity_level'),
             custom_art_description=booking_data.get('custom_art_description', ''),
             payment_amount=amount,
-            status='Pending',
+            status='Waiting',  # 'Waiting' for artist approval (not 'Pending')
             payment_status='pending'
         )
         
