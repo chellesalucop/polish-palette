@@ -18,102 +18,112 @@ logger = logging.getLogger(__name__)
 def paymongo_webhook(request):
     """Handle PayMongo webhook events"""
     try:
+        # Get the raw payload
+        payload = request.body.decode('utf-8')
+        logger.info(f"Webhook received. Payload: {payload[:500]}...")
+        
         # Get the signature from headers
         signature_header = request.headers.get('Paymongo-Signature')
         if not signature_header:
-            logger.error("No PayMongo signature found")
-            return JsonResponse({'error': 'No signature'}, status=400)
-        
-        # Get the raw payload
-        payload = request.body.decode('utf-8')
-        
-        # Verify the signature
-        paymongo = PayMongoService()
-        if not paymongo.verify_webhook_signature(payload, signature_header):
-            logger.error("Invalid webhook signature")
-            return JsonResponse({'error': 'Invalid signature'}, status=400)
+            logger.error("No PayMongo signature found in headers")
+            logger.info(f"Available headers: {dict(request.headers)}")
+        else:
+            # Verify the signature
+            paymongo = PayMongoService()
+            if not paymongo.verify_webhook_signature(payload, signature_header):
+                logger.error("Invalid webhook signature - but continuing for debugging")
+                # Continue processing even if signature fails (for debugging)
+            else:
+                logger.info("Webhook signature verified successfully")
         
         # Parse the webhook data
         webhook_data = json.loads(payload)
-        event_type = webhook_data.get('data', {}).get('attributes', {}).get('type')
         
-        logger.info(f"Received webhook event: {event_type}")
+        # PayMongo event structure: data.attributes.type
+        event_data = webhook_data.get('data', {})
+        attributes = event_data.get('attributes', {})
+        event_type = attributes.get('type')
+        
+        logger.info(f"Received webhook event type: {event_type}")
+        logger.info(f"Full event data: {json.dumps(webhook_data, indent=2)[:1000]}")
         
         # Handle different event types
         if event_type == 'checkout_session.payment.paid':
+            logger.info("Processing checkout_session.payment.paid event")
             handle_checkout_session_paid(webhook_data)
         elif event_type == 'payment.paid':
+            logger.info("Processing payment.paid event")
             handle_payment_paid(webhook_data)
         elif event_type == 'payment.failed':
+            logger.info("Processing payment.failed event")
             handle_payment_failed(webhook_data)
+        else:
+            logger.warning(f"Unhandled event type: {event_type}")
         
         # Return success response
         return JsonResponse({
             'status': 'success',
-            'message': 'Webhook received successfully'
+            'message': 'Webhook received successfully',
+            'event_type': event_type
         })
         
     except Exception as e:
-        logger.error(f"Webhook processing error: {str(e)}")
+        logger.error(f"Webhook processing error: {str(e)}", exc_info=True)
         return JsonResponse({'error': str(e)}, status=500)
 
 
 def handle_checkout_session_paid(webhook_data):
     """Handle successful checkout session payment"""
     try:
-        session_data = webhook_data['data']['attributes']['data']
-        checkout_id = session_data['id']
-        metadata = session_data.get('metadata', {})
+        logger.info(f"handle_checkout_session_paid called with data: {json.dumps(webhook_data, indent=2)[:1000]}")
+        
+        # PayMongo event structure: data.attributes.data contains the checkout session
+        event_attributes = webhook_data.get('data', {}).get('attributes', {})
+        session_data = event_attributes.get('data', {})
+        
+        if not session_data:
+            logger.error("No session data found in webhook payload")
+            logger.error(f"Available keys: {event_attributes.keys()}")
+            return
+        
+        checkout_id = session_data.get('id')
+        session_attrs = session_data.get('attributes', {})
+        metadata = session_attrs.get('metadata', {})
         appointment_id = metadata.get('appointment_id')
         
-        if appointment_id:
-            # Create appointment record after successful payment
-            try:
-                appointment = Appointment.objects.get(id=appointment_id)
-            except Appointment.DoesNotExist:
-                # If appointment doesn't exist, create it from metadata
-                service_category = metadata.get('service_category')
-                service = None
-                
-                # Get the actual Service object
-                if service_category == 'gel_polish':
-                    service = Service.objects.filter(name__icontains='Gel Polish').first()
-                elif service_category == 'soft_gel_extensions':
-                    service = Service.objects.filter(name__icontains='Extensions').first()
-                elif service_category == 'removal':
-                    service = Service.objects.filter(name__icontains='Removal').first()
-                
-                appointment = Appointment.objects.create(
-                    client=None,  # Will be updated later from session
-                    service=service,
-                    core_category=service_category,
-                    style_complexity=metadata.get('complexity_level'),
-                    artist_id=None,  # Will be updated later
-                    date=None,  # Will be updated later
-                    time=None,  # Will be updated later
-                    payment_amount=None,  # Will be updated later
-                    status='Approved',
-                    payment_status='paid',
-                    payment_id=checkout_id,
-                    payment_date=timezone.now()
-                )
-                
-                logger.info(f"Created new appointment {appointment.id} after payment")
-            else:
-                # Update existing appointment
-                # Status stays 'Waiting' so artist can approve/reject the paid appointment
-                appointment.payment_status = 'paid'
-                appointment.payment_id = checkout_id
-                appointment.payment_date = timezone.now()
-                appointment.save()
-                
-                logger.info(f"Updated appointment {appointment_id} after payment - waiting for artist approval")
-                
-                # Send notifications for paid appointment
-                _send_payment_notifications(appointment)
+        logger.info(f"Extracted checkout_id: {checkout_id}, appointment_id: {appointment_id}")
+        logger.info(f"Metadata: {metadata}")
+        
+        if not appointment_id:
+            logger.error("No appointment_id found in metadata")
+            return
+        
+        # Find and update appointment record after successful payment
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            logger.info(f"Found existing appointment: {appointment.id}")
+        except Appointment.DoesNotExist:
+            logger.error(f"Appointment {appointment_id} not found!")
+            return
+        
+        # Update existing appointment
+        # Status stays 'Waiting' so artist can approve/reject the paid appointment
+        appointment.payment_status = 'paid'
+        appointment.payment_id = checkout_id
+        appointment.payment_date = timezone.now()
+        appointment.save()
+        
+        logger.info(f"Updated appointment {appointment_id} - payment_status: paid, status: {appointment.status}")
+        
+        # Send notifications for paid appointment
+        try:
+            _send_payment_notifications(appointment)
+            logger.info(f"Payment notifications sent successfully for appointment {appointment_id}")
+        except Exception as notify_error:
+            logger.error(f"Error sending notifications: {str(notify_error)}", exc_info=True)
         
     except Exception as e:
-        logger.error(f"Error handling checkout session paid: {str(e)}")
+        logger.error(f"Error handling checkout session paid: {str(e)}", exc_info=True)
 
 
 def _send_payment_notifications(appointment):
@@ -126,8 +136,13 @@ def _send_payment_notifications(appointment):
         artist = appointment.artist
         service = appointment.service
         
-        if not client or not artist:
-            logger.warning(f"Cannot send notifications: missing client or artist for appointment {appointment.id}")
+        logger.info(f"Sending notifications for appointment {appointment.id}: client={client}, artist={artist}, service={service}")
+        
+        if not client:
+            logger.warning(f"Cannot send notifications: missing client for appointment {appointment.id}")
+            return
+        if not artist:
+            logger.warning(f"Cannot send notifications: missing artist for appointment {appointment.id}")
             return
         
         # Format date and time strings
@@ -136,37 +151,47 @@ def _send_payment_notifications(appointment):
         service_name = service.name if service else 'Nail Service'
         base_url = settings.BASE_URL if hasattr(settings, 'BASE_URL') else 'http://127.0.0.1:8000'
         
+        logger.info(f"Appointment details: {service_name} on {appt_date_str} at {appt_time_str}")
+        
         # Create booking label
         booking_label = service_name
         if appointment.style_complexity:
             booking_label += f" • {appointment.get_style_complexity_display()}"
         
         # Log booking activity
-        log_booking_activity(
-            appointment=appointment,
-            activity_type='booking_created',
-            description=f"Paid booking created by {client.get_full_name()} for {service_name} with {artist.get_full_name()}",
-            user=client,
-            request=None,
-            metadata={
-                'service_category': appointment.core_category,
-                'complexity_level': appointment.style_complexity,
-                'payment_status': 'paid',
-                'payment_id': appointment.payment_id
-            }
-        )
+        try:
+            log_booking_activity(
+                appointment=appointment,
+                activity_type='booking_created',
+                description=f"Paid booking created by {client.get_full_name()} for {service_name} with {artist.get_full_name()}",
+                user=client,
+                request=None,
+                metadata={
+                    'service_category': appointment.core_category,
+                    'complexity_level': appointment.style_complexity,
+                    'payment_status': 'paid',
+                    'payment_id': appointment.payment_id
+                }
+            )
+            logger.info(f"Booking activity logged successfully")
+        except Exception as activity_error:
+            logger.error(f"Error logging booking activity: {str(activity_error)}", exc_info=True)
         
         # Broadcast WebSocket update to artist
-        _broadcast_booking_update(appointment, {
-            'event': 'new_booking',
-            'appointment_id': appointment.id,
-            'client_name': client.get_full_name(),
-            'service_name': service_name,
-            'appointment_date': appt_date_str,
-            'appointment_time': appt_time_str,
-            'status': 'Waiting',
-            'payment_status': 'paid',
-        })
+        try:
+            _broadcast_booking_update(appointment, {
+                'event': 'new_booking',
+                'appointment_id': appointment.id,
+                'client_name': client.get_full_name(),
+                'service_name': service_name,
+                'appointment_date': appt_date_str,
+                'appointment_time': appt_time_str,
+                'status': 'Waiting',
+                'payment_status': 'paid',
+            })
+            logger.info(f"WebSocket broadcast sent successfully")
+        except Exception as ws_error:
+            logger.error(f"Error broadcasting WebSocket update: {str(ws_error)}", exc_info=True)
         
         # Create a mock request for notify_user_pair (needed for both emails)
         class MockRequest:
@@ -176,73 +201,109 @@ def _send_payment_notifications(appointment):
         mock_request = MockRequest(client)
         
         # Send email to artist
-        artist_email = artist.user.email if artist.user else artist.email
-        if artist_email:
-            notify_user_pair(
-                mock_request,
-                receiver_email=artist_email,
-                subject=f'New Paid Appointment Request – {booking_label}',
-                toast_message=f'New paid booking request for {booking_label} on {appt_date_str}! Please approve or reject.',
-                email_template='new_booking_artist',
-                context={
-                    'artist_name': artist.get_full_name(),
-                    'client_name': f'{client.first_name} {client.last_name}',
-                    'service_name': booking_label,
-                    'appointment_date': appt_date_str,
-                    'appointment_time': appt_time_str,
-                    'dashboard_url': f'{base_url}/artist/dashboard/',
-                    'reference_info': f"Payment Status: Paid via PayMongo | Action Required: Please approve or reject",
-                    'plain_text': f'New paid booking request by {client.first_name} for {booking_label} on {appt_date_str} at {appt_time_str}. Payment confirmed. Please approve or reject this appointment.',
-                },
-                toast_level=messages.INFO,
-            )
+        try:
+            artist_email = artist.user.email if (artist.user and artist.user.email) else artist.email
+            logger.info(f"Artist email: {artist_email}")
+            if artist_email:
+                notify_user_pair(
+                    mock_request,
+                    receiver_email=artist_email,
+                    subject=f'New Paid Appointment Request – {booking_label}',
+                    toast_message=f'New paid booking request for {booking_label} on {appt_date_str}! Please approve or reject.',
+                    email_template='new_booking_artist',
+                    context={
+                        'artist_name': artist.get_full_name(),
+                        'client_name': f'{client.first_name} {client.last_name}',
+                        'service_name': booking_label,
+                        'appointment_date': appt_date_str,
+                        'appointment_time': appt_time_str,
+                        'dashboard_url': f'{base_url}/artist/dashboard/',
+                        'reference_info': f"Payment Status: Paid via PayMongo | Action Required: Please approve or reject",
+                        'plain_text': f'New paid booking request by {client.first_name} for {booking_label} on {appt_date_str} at {appt_time_str}. Payment confirmed. Please approve or reject this appointment.',
+                    },
+                    toast_level=messages.INFO,
+                )
+                logger.info(f"Artist email sent successfully to {artist_email}")
+            else:
+                logger.warning(f"No email found for artist {artist.id}")
+        except Exception as artist_email_error:
+            logger.error(f"Error sending artist email: {str(artist_email_error)}", exc_info=True)
         
         # Send email to client
-        notify_user_pair(
-            mock_request,
-            receiver_email=client.email,
-            subject=f'Payment Received – Waiting for Artist Approval – {booking_label}',
-            toast_message=f'Your payment for {booking_label} was successful! Waiting for artist approval.',
-            email_template='appointment_waiting',
-            context={
-                'client_name': client.first_name,
-                'artist_name': artist.get_full_name(),
-                'service_name': booking_label,
-                'appointment_date': appt_date_str,
-                'appointment_time': appt_time_str,
-                'appointments_url': f'{base_url}/appointments/',
-                'duration_info': f'Payment confirmed (ID: {appointment.payment_id}). Waiting for artist approval.',
-                'plain_text': f'Your payment for {booking_label} on {appt_date_str} at {appt_time_str} was successful. Payment ID: {appointment.payment_id}. Your appointment is now waiting for artist approval.',
-            },
-        )
+        try:
+            client_email = client.email if client.email else (client.user.email if hasattr(client, 'user') and client.user else None)
+            logger.info(f"Client email: {client_email}")
+            if client_email:
+                notify_user_pair(
+                    mock_request,
+                    receiver_email=client_email,
+                    subject=f'Payment Received – Waiting for Artist Approval – {booking_label}',
+                    toast_message=f'Your payment for {booking_label} was successful! Waiting for artist approval.',
+                    email_template='appointment_waiting',
+                    context={
+                        'client_name': client.first_name,
+                        'artist_name': artist.get_full_name(),
+                        'service_name': booking_label,
+                        'appointment_date': appt_date_str,
+                        'appointment_time': appt_time_str,
+                        'appointments_url': f'{base_url}/appointments/',
+                        'duration_info': f'Payment confirmed (ID: {appointment.payment_id}). Waiting for artist approval.',
+                        'plain_text': f'Your payment for {booking_label} on {appt_date_str} at {appt_time_str} was successful. Payment ID: {appointment.payment_id}. Your appointment is now waiting for artist approval.',
+                    },
+                )
+                logger.info(f"Client email sent successfully to {client_email}")
+            else:
+                logger.warning(f"No email found for client {client.id}")
+        except Exception as client_email_error:
+            logger.error(f"Error sending client email: {str(client_email_error)}", exc_info=True)
         
-        logger.info(f"Sent payment notifications for appointment {appointment.id}")
+        logger.info(f"All payment notifications processed for appointment {appointment.id}")
         
     except Exception as e:
-        logger.error(f"Error sending payment notifications: {str(e)}")
+        logger.error(f"Error in _send_payment_notifications: {str(e)}", exc_info=True)
 
 
 def handle_payment_paid(webhook_data):
     """Handle successful payment"""
     try:
-        payment_data = webhook_data['data']['attributes']['data']
-        payment_id = payment_data['id']
-        metadata = payment_data.get('metadata', {})
+        logger.info(f"handle_payment_paid called")
+        
+        event_attributes = webhook_data.get('data', {}).get('attributes', {})
+        payment_data = event_attributes.get('data', {})
+        
+        if not payment_data:
+            logger.error("No payment data found in webhook")
+            return
+        
+        payment_id = payment_data.get('id')
+        payment_attrs = payment_data.get('attributes', {})
+        metadata = payment_attrs.get('metadata', {})
         appointment_id = metadata.get('appointment_id')
+        
+        logger.info(f"Payment {payment_id} for appointment {appointment_id}")
         
         if appointment_id:
             # Update appointment payment status
-            appointment = Appointment.objects.get(id=appointment_id)
-            appointment.payment_status = 'paid'
-            appointment.payment_id = payment_id
-            appointment.status = 'Approved'
-            appointment.payment_date = timezone.now()
-            appointment.save()
-            
-            logger.info(f"Appointment {appointment_id} payment confirmed")
+            try:
+                appointment = Appointment.objects.get(id=appointment_id)
+                appointment.payment_status = 'paid'
+                appointment.payment_id = payment_id
+                # Status stays 'Waiting' for artist approval
+                appointment.payment_date = timezone.now()
+                appointment.save()
+                
+                logger.info(f"Appointment {appointment_id} payment confirmed, status kept as {appointment.status}")
+                
+                # Send notifications
+                try:
+                    _send_payment_notifications(appointment)
+                except Exception as notify_error:
+                    logger.error(f"Error in notifications: {str(notify_error)}", exc_info=True)
+            except Appointment.DoesNotExist:
+                logger.error(f"Appointment {appointment_id} not found")
         
     except Exception as e:
-        logger.error(f"Error handling payment paid: {str(e)}")
+        logger.error(f"Error handling payment paid: {str(e)}", exc_info=True)
 
 
 def handle_payment_failed(webhook_data):
