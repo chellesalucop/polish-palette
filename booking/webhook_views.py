@@ -101,13 +101,13 @@ def handle_checkout_session_paid(webhook_data):
                 logger.info(f"Created new appointment {appointment.id} after payment")
             else:
                 # Update existing appointment
-                appointment.status = 'Approved'
+                # Status stays 'Waiting' so artist can approve/reject the paid appointment
                 appointment.payment_status = 'paid'
                 appointment.payment_id = checkout_id
                 appointment.payment_date = timezone.now()
                 appointment.save()
                 
-                logger.info(f"Updated appointment {appointment_id} after payment")
+                logger.info(f"Updated appointment {appointment_id} after payment - waiting for artist approval")
                 
                 # Send notifications for paid appointment
                 _send_payment_notifications(appointment)
@@ -164,7 +164,7 @@ def _send_payment_notifications(appointment):
             'service_name': service_name,
             'appointment_date': appt_date_str,
             'appointment_time': appt_time_str,
-            'status': 'Approved',
+            'status': 'Waiting',
             'payment_status': 'paid',
         })
         
@@ -181,8 +181,8 @@ def _send_payment_notifications(appointment):
             notify_user_pair(
                 mock_request,
                 receiver_email=artist_email,
-                subject=f'New Paid Appointment – {booking_label}',
-                toast_message=f'New paid booking for {booking_label} on {appt_date_str}!',
+                subject=f'New Paid Appointment Request – {booking_label}',
+                toast_message=f'New paid booking request for {booking_label} on {appt_date_str}! Please approve or reject.',
                 email_template='new_booking_artist',
                 context={
                     'artist_name': artist.get_full_name(),
@@ -191,8 +191,8 @@ def _send_payment_notifications(appointment):
                     'appointment_date': appt_date_str,
                     'appointment_time': appt_time_str,
                     'dashboard_url': f'{base_url}/artist/dashboard/',
-                    'reference_info': f"Payment Status: Paid via PayMongo",
-                    'plain_text': f'New paid booking by {client.first_name} for {booking_label} on {appt_date_str} at {appt_time_str}. Payment confirmed.',
+                    'reference_info': f"Payment Status: Paid via PayMongo | Action Required: Please approve or reject",
+                    'plain_text': f'New paid booking request by {client.first_name} for {booking_label} on {appt_date_str} at {appt_time_str}. Payment confirmed. Please approve or reject this appointment.',
                 },
                 toast_level=messages.INFO,
             )
@@ -201,8 +201,8 @@ def _send_payment_notifications(appointment):
         notify_user_pair(
             mock_request,
             receiver_email=client.email,
-            subject=f'Appointment Confirmed – {booking_label}',
-            toast_message=f'Your booking for {booking_label} has been confirmed and paid.',
+            subject=f'Payment Received – Waiting for Artist Approval – {booking_label}',
+            toast_message=f'Your payment for {booking_label} was successful! Waiting for artist approval.',
             email_template='appointment_waiting',
             context={
                 'client_name': client.first_name,
@@ -211,8 +211,8 @@ def _send_payment_notifications(appointment):
                 'appointment_date': appt_date_str,
                 'appointment_time': appt_time_str,
                 'appointments_url': f'{base_url}/appointments/',
-                'duration_info': 'Please arrive 5 minutes before your appointment',
-                'plain_text': f'Your booking for {booking_label} on {appt_date_str} at {appt_time_str} has been confirmed and paid. Payment ID: {appointment.payment_id}',
+                'duration_info': f'Payment confirmed (ID: {appointment.payment_id}). Waiting for artist approval.',
+                'plain_text': f'Your payment for {booking_label} on {appt_date_str} at {appt_time_str} was successful. Payment ID: {appointment.payment_id}. Your appointment is now waiting for artist approval.',
             },
         )
         
