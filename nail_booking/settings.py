@@ -318,6 +318,11 @@ EMAIL_SUBJECT_PREFIX = '[Polish Palette] '
 
 
 
+# PayMongo Configuration
+PAYMONGO_SECRET_KEY = env('PAYMONGO_SECRET_KEY')
+PAYMONGO_WEBHOOK_SECRET = env('PAYMONGO_WEBHOOK_SECRET')
+BASE_URL = env('BASE_URL')
+
 # Disable Django's built-in debug toolbar in production
 if DEBUG:
     try:

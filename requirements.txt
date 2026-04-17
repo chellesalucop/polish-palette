@@ -107,3 +107,4 @@ sendgrid==6.11.0
 django-anymail
 django-cloudinary-storage
 cloudinary
+paymongo==0.1.3.dev0

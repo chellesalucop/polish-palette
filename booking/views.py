@@ -895,12 +895,18 @@ def booking_create_view(request):
             formatted_time = datetime.strptime(appointment_time, '%H:%M').time()
             
             # Check for duplicate bookings
-            # Check if client already has appointment at this slot
-            already_exists = Appointment.objects.filter(
+            # Check if client already has an appointment for this service category on this day
+            daily_service_exists = Appointment.objects.filter(
+                client=request.user,
+                date=formatted_date,
+                core_category=service_category,
+            ).exclude(status__in=['Cancelled', 'Rejected']).exists()
+            
+            # Check if client already has ANY appointment at this time slot
+            time_conflict = Appointment.objects.filter(
                 client=request.user,
                 date=formatted_date,
                 time=formatted_time,
-                service=service,
             ).exclude(status__in=['Cancelled', 'Rejected']).exists()
             
             # CRITICAL: Check if artist is already booked at this slot
@@ -910,13 +916,25 @@ def booking_create_view(request):
                 time=formatted_time,
             ).exclude(status__in=['Cancelled', 'Rejected']).exists()
             
-            if already_exists:
+            if daily_service_exists:
+                category_display = service_category.replace('_', ' ').title()
+                error_msg = f'You can only book one {category_display} appointment per day.'
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({
                         'success': False,
-                        'message': 'You already have an appointment booked for that slot.'
+                        'message': error_msg
                     })
-                messages.info(request, 'You already have an appointment booked for that slot.')
+                messages.info(request, error_msg)
+                return redirect('appointments_list')
+                
+            if time_conflict:
+                error_msg = 'You already have an appointment booked for that time slot.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': error_msg
+                    })
+                messages.info(request, error_msg)
                 return redirect('appointments_list')
             
             if artist_conflict:

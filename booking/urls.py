@@ -1,7 +1,9 @@
 from django.urls import path, include
 from . import views
 from . import views_health
-
+from . import api_views
+from . import webhook_views
+from . import payment_views
 
 urlpatterns = [
     # Health check endpoint (must be first for performance)
@@ -263,6 +265,22 @@ urlpatterns = [
     path('api/notifications/mark-read/', views.notifications_mark_read, name='notifications_mark_read'),
 
     path('api/notifications/clear/', views.notifications_clear, name='notifications_clear'),
+
+
+
+# Payment API Endpoints
+
+    path('api/create-checkout-session/', api_views.create_checkout_session, name='create_checkout_session'),
+
+    path('api/payment-status/', api_views.get_payment_status, name='get_payment_status'),
+
+    path('api/paymongo-webhook/', webhook_views.paymongo_webhook, name='paymongo_webhook'),
+
+    # Payment Success/Cancel Pages
+
+    path('booking/payment-success/', payment_views.payment_success_view, name='payment_success'),
+
+    path('booking/payment-cancelled/', payment_views.payment_cancelled_view, name='payment_cancelled'),
 
 
 

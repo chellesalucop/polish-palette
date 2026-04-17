@@ -748,6 +748,33 @@ class Appointment(models.Model):
     # --- NEW PAYMENT FIELDS ---
     reference_code = models.CharField(max_length=100, blank=True, null=True)
     payment_receipt = CloudinaryField('payment_receipts', folder='Polish Palette/payment_receipts/', blank=True, null=True)
+    
+    # --- PAYMONGO PAYMENT FIELDS ---
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('paid', 'Paid'),
+            ('failed', 'Failed'),
+            ('cancelled', 'Cancelled'),
+            ('refunded', 'Refunded'),
+        ],
+        default='pending'
+    )
+    payment_id = models.CharField(max_length=100, blank=True, null=True, help_text="PayMongo payment/session ID")
+    payment_method = models.CharField(
+        max_length=20,
+        choices=[
+            ('gcash', 'GCash'),
+            ('paymaya', 'PayMaya'),
+            ('card', 'Credit/Debit Card'),
+            ('billease', 'Billease'),
+        ],
+        blank=True,
+        null=True
+    )
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    payment_date = models.DateTimeField(null=True, blank=True)
 
     # --- RESCHEDULE SOFT-LOCK FIELDS ---
     proposed_date = models.DateField(null=True, blank=True)

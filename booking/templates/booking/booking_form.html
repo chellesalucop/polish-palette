@@ -381,7 +381,7 @@
                 </div>
 
                 <div class="booking-step" id="step-6">
-                    <h2 class="step-title">Confirm Your Booking</h2>
+                    <h2 class="step-title">Confirm Your Booking & Payment</h2>
 
                     <div class="summary-section">
                         <h3>Booking Details</h3>
@@ -415,6 +415,19 @@
                         </div>
                     </div>
 
+                    <!-- Payment Section -->
+                    <div class="payment-section" id="paymentSection">
+                        <h3>Payment Information</h3>
+                        <div class="payment-methods-info">
+                            <p><i class="bi bi-shield-check"></i> Secure payment powered by PayMongo</p>
+                            <div class="accepted-methods">
+                                <span class="method-badge">GCash</span>
+                                <span class="method-badge">PayMaya</span>
+                                <span class="method-badge">Credit/Debit Card</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <a href="{% url 'dashboard' %}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i>
@@ -425,7 +438,7 @@
                             <input type="checkbox" class="form-check-input" id="acknowledge48Hour" required>
                             <label class="form-check-label" for="acknowledge48Hour">
                                 <strong>[X]</strong> I acknowledge that I can only Re-Schedule or Cancel my appointment
-                                up to 2 days (48 hours) before the start time.
+                                up to 2 days (48 hours) before start time.
                             </label>
                         </div>
 
@@ -435,9 +448,10 @@
                                 <i class="bi bi-arrow-left"></i>
                                 Previous
                             </button>
-                            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-                                <i class="bi bi-check-circle"></i>
-                                Confirm Booking
+                            <button type="button" class="btn btn-primary" id="payBtn" disabled
+                                onclick="processPayment()">
+                                <i class="bi bi-lock"></i>
+                                Confirm Payment
                             </button>
                         </div>
                     </div>
@@ -460,5 +474,6 @@
 
 <script src="{% static 'js/booking_form.js' %}"></script>
 <script src="{% static 'js/dynamic_booking.js' %}"></script>
+<script src="{% static 'js/paymongo_payment.js' %}"></script>
 
 {% endblock %}
