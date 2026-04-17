@@ -47,7 +47,9 @@ class PayMongoPayment {
                 // Redirect to PayMongo checkout
                 window.location.href = data.checkout_url;
             } else {
-                this.showError(data.error || 'Failed to create payment session');
+                // Show detailed error message (includes booking limit messages)
+                const errorMessage = data.message || data.error || 'Failed to create payment session';
+                this.showError(errorMessage);
             }
             
         } catch (error) {
