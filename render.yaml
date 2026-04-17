@@ -1,5 +1,5 @@
 services:
-  # Web Service
+  # Web Service - Polish Palette Django Application
   - type: web
     name: polish-palette
     env: python
