@@ -108,12 +108,7 @@ class PayMongoPayment {
             artist_id: artist ? artist.value : null,
             date: document.getElementById('appointment_date').value || null,
             time: document.getElementById('appointment_time').value || null,
-            design_preferences: {
-                reference_type: referenceOption ? referenceOption.dataset.reference : '',
-                gallery_image_id: document.getElementById('galleryImageId').value || '',
-                custom_art_description: document.getElementById('designNote').value || ''
-            },
-            add_ons: []
+            custom_art_description: document.getElementById('designNote')?.value || ''
         };
     }
     

@@ -30,17 +30,23 @@ def create_checkout_session(request):
         if service_category:
             service = Service.objects.filter(name__icontains=service_category.replace('_', ' ').title()).first()
         
+        # Get artist object
+        artist_id = booking_data.get('artist_id')
+        artist = None
+        if artist_id:
+            from .models import Artist
+            artist = Artist.objects.filter(id=artist_id).first()
+        
         # Create pending appointment before payment
         appointment = Appointment.objects.create(
             client=request.user if request.user.is_authenticated else None,
             service=service,
-            artist_id=booking_data.get('artist_id'),
+            artist=artist,
             date=booking_data.get('date'),
             time=booking_data.get('time'),
             core_category=service_category,
             style_complexity=booking_data.get('complexity_level'),
-            design_preferences=booking_data.get('design_preferences', {}),
-            add_ons=booking_data.get('add_ons', []),
+            custom_art_description=booking_data.get('custom_art_description', ''),
             payment_amount=amount,
             status='Pending',
             payment_status='pending'
